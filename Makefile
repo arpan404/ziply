@@ -129,6 +129,78 @@ Ziply/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/build
 .PHONY : Ziply/fast
 
+src/Error.o: src/Error.cpp.o
+.PHONY : src/Error.o
+
+# target to build an object file
+src/Error.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/Error.cpp.o
+.PHONY : src/Error.cpp.o
+
+src/Error.i: src/Error.cpp.i
+.PHONY : src/Error.i
+
+# target to preprocess a source file
+src/Error.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/Error.cpp.i
+.PHONY : src/Error.cpp.i
+
+src/Error.s: src/Error.cpp.s
+.PHONY : src/Error.s
+
+# target to generate assembly for a file
+src/Error.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/Error.cpp.s
+.PHONY : src/Error.cpp.s
+
+src/File.o: src/File.cpp.o
+.PHONY : src/File.o
+
+# target to build an object file
+src/File.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/File.cpp.o
+.PHONY : src/File.cpp.o
+
+src/File.i: src/File.cpp.i
+.PHONY : src/File.i
+
+# target to preprocess a source file
+src/File.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/File.cpp.i
+.PHONY : src/File.cpp.i
+
+src/File.s: src/File.cpp.s
+.PHONY : src/File.s
+
+# target to generate assembly for a file
+src/File.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/File.cpp.s
+.PHONY : src/File.cpp.s
+
+src/Ziply.o: src/Ziply.cpp.o
+.PHONY : src/Ziply.o
+
+# target to build an object file
+src/Ziply.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/Ziply.cpp.o
+.PHONY : src/Ziply.cpp.o
+
+src/Ziply.i: src/Ziply.cpp.i
+.PHONY : src/Ziply.i
+
+# target to preprocess a source file
+src/Ziply.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/Ziply.cpp.i
+.PHONY : src/Ziply.cpp.i
+
+src/Ziply.s: src/Ziply.cpp.s
+.PHONY : src/Ziply.s
+
+# target to generate assembly for a file
+src/Ziply.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/Ziply.cpp.s
+.PHONY : src/Ziply.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -153,30 +225,6 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
-src/ziply.o: src/ziply.cpp.o
-.PHONY : src/ziply.o
-
-# target to build an object file
-src/ziply.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/ziply.cpp.o
-.PHONY : src/ziply.cpp.o
-
-src/ziply.i: src/ziply.cpp.i
-.PHONY : src/ziply.i
-
-# target to preprocess a source file
-src/ziply.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/ziply.cpp.i
-.PHONY : src/ziply.cpp.i
-
-src/ziply.s: src/ziply.cpp.s
-.PHONY : src/ziply.s
-
-# target to generate assembly for a file
-src/ziply.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/ziply.cpp.s
-.PHONY : src/ziply.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -186,12 +234,18 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Ziply"
+	@echo "... src/Error.o"
+	@echo "... src/Error.i"
+	@echo "... src/Error.s"
+	@echo "... src/File.o"
+	@echo "... src/File.i"
+	@echo "... src/File.s"
+	@echo "... src/Ziply.o"
+	@echo "... src/Ziply.i"
+	@echo "... src/Ziply.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
-	@echo "... src/ziply.o"
-	@echo "... src/ziply.i"
-	@echo "... src/ziply.s"
 .PHONY : help
 
 
