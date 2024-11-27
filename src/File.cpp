@@ -19,5 +19,6 @@ void File::convertToBinary(std::string *const data){
     if(!file){
         throw Error("Could not open the file", "a");
     }
+    
 
 }
