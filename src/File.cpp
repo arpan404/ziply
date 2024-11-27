@@ -12,3 +12,12 @@ fs::path File::convertToPath(const std::string &fileName){
     fs::path currentDirectory = fs::current_path();
     return currentDirectory / fileName;
 }
+
+void File::convertToBinary(std::string *const data){
+    std::fstream file(this->filePath, std::ios::binary);
+
+    if(!file){
+        throw Error("Could not open the file", "a");
+    }
+
+}

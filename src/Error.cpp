@@ -8,8 +8,8 @@ Error::Error(const std::string message, std::string code)
 
 void Error::handle()
 {
-    std::cout << "Error occured. For more info, see the error log below" << "\n";
-    std::cout << "Error message: " << this->message << "\n";
-    std::cout << "Error code:  " << this->code << "\n";
+    std::cerr << "Error occured. For more info, see the error log below" << "\n";
+    std::cerr << "Error message: " << this->message << "\n";
+    std::cerr << "Error code:  " << this->code << "\n";
     exit(1);
 }
