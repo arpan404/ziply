@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <bitset>
+#include <Magick++.h>
 
 #include "Error.hpp"
 
@@ -24,9 +25,7 @@ private:
     bool pathExists(const std::string &path);
     fs::path convertToPath(const std::string &fileName);
 
-    
-
-    void generateFrames();
+    void generateFrames(std::vector<char> buffer, std::streamsize bytes_read);
 };
 
 #endif
