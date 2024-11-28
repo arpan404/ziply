@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Add executable
-add_executable(Ziply src/main.cpp src/Ziply.cpp src/Error.cpp src/File.cpp)
+add_executable(Ziply src/main.cpp src/Ziply.cpp src/Error.cpp src/File.cpp src/ThreadPool.cpp)
 
 # Include directories
 target_include_directories(Ziply PRIVATE 

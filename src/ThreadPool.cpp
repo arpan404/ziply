@@ -11,8 +11,8 @@ ThreadPool::ThreadPool(size_t threads)
                 {
                     std::unique_lock<std::mutex> lock(queueMutex);
                     condition.wait(lock, [this]{
-                        return stop || !task.empty();
-                    })
+                        return stop || !tasks.empty();
+                    });
                     if(stop && tasks.empty()){
                         return;
                     }
@@ -22,18 +22,8 @@ ThreadPool::ThreadPool(size_t threads)
 
                 }
                 task();
-            } })
+            } });
     }
-}
-
-void ThreadPool::enqueue(F &&task)
-{
-    {
-        std::unique_lock<std::mutex> lock(queueMutex);
-        tasks.emplace(std::forward<F>(task));
-    }
-
-    condition.notify_one();
 }
 
 ThreadPool::~ThreadPool()

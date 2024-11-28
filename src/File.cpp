@@ -1,4 +1,5 @@
 #include "File.hpp"
+#include "ThreadPool.hpp"
 
 File::File(std::string fileName, int frameWidth, int frameHeight)
 {
@@ -24,38 +25,26 @@ void File::convertToFrames()
     size_t chunk_size = ((this->frameHeight * this->frameWidth) / 8);
     std::ifstream file(this->filePath, std::ios::binary);
     Magick::InitializeMagick(nullptr);
-
-    std::vector<std::thread> threads;
-
-    int currentFrame = 0;
+    ThreadPool pool(std::thread::hardware_concurrency()); // Use the number of available cores
 
     if (!file)
     {
-        throw Error("Could not open the file", "input-file-error");
+        throw Error("Could not open the file", "efx1");
     }
 
     std::vector<char> buffer(chunk_size);
-
+    int currentFrame = 0;
     while (file)
     {
+        std::cout << "Loading: " << currentFrame;
         file.read(buffer.data(), buffer.size());
-
         std::streamsize bytes_read = file.gcount();
-
         if (bytes_read > 0)
         {
-            std::string currentFrameName = std::to_string(currentFrame) + ".png";
-            threads.push_back(std::thread([this, buffer, bytes_read, currentFrameName]()
-                                          { generateFrames(buffer, bytes_read, currentFrameName); }));
+            std::string frameName = std::to_string(currentFrame++) + ".png";
+            pool.enqueue([this, buffer, bytes_read, frameName]()
+                         { generateFrames(buffer, bytes_read, frameName); });
         }
-        if (bytes_read < chunk_size)
-        {
-            break;
-        }
-    }
-    for (auto &t : threads)
-    {
-        t.join();
     }
 }
 
@@ -73,19 +62,14 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
 
             for (int j = 0; j < 8; ++j)
             {
-                if (currentByte[j] == 0)
-                {
-                    image.pixelColor(currentXaxis, currentYaxis, Magick::Color("white"));
-                }
-                else
-                {
-                    image.pixelColor(currentXaxis, currentYaxis, Magick::Color("black"));
-                }
+                image.pixelColor(currentXaxis, currentYaxis, currentByte[j] ? "black" : "white");
+
                 ++currentXaxis;
                 if (currentXaxis >= this->frameWidth)
                 {
                     currentXaxis = 0;
                     ++currentYaxis;
+
                     if (currentYaxis >= this->frameHeight)
                     {
                         break;
@@ -98,7 +82,10 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
             }
         }
 
-        image.write(frameName);
+#pragma omp parallel
+        {
+            image.write(frameName);
+        }
     }
     catch (const std::exception &e)
     {
