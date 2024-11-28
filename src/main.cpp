@@ -4,6 +4,6 @@
 int main()
 {
     std::cout << "Hello World" << "\n";
-    File file = File("test.png", 1080, 1080);
+    File file = File("test.png", 220, 220);
     file.convertToFrames();
 }
