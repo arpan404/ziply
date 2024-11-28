@@ -7,7 +7,7 @@ File::File(std::string fileName, int frameWidth, int frameHeight)
     this->fileName = fileName;
     this->frameHeight = frameHeight;
     this->frameWidth = frameWidth;
-    this->filePath = "ff.png";
+    this->filePath = "test.png";
     std::cout << "Called" << std::flush;
 }
 
@@ -29,7 +29,7 @@ void File::convertToFrames()
     std::ifstream file(this->filePath, std::ios::binary);
     std::cout << 1;
     std::cout << 2;
-    ThreadPool pool(std::thread::hardware_concurrency()); // Use the number of available cores
+    ThreadPool pool(std::thread::hardware_concurrency());
     std::cout << 3;
 
     if (!file)
@@ -66,6 +66,7 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
     for (size_t i = 0; i < bytes_read; ++i)
     {
         std::bitset<8> currentByte(buffer[i]);
+        
         for (int j = 0; j < 8; ++j)
         {
 
@@ -92,7 +93,7 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
         int x = currentXaxis;
         for (int y = currentYaxis; y < this->frameHeight; ++y)
         {
-            for (x; x < this->frameWidth; ++x)
+            for (; x < this->frameWidth; ++x)
             {
                 image[(y * this->frameWidth + x) * 3 + 0] = 255; // Red channel
                 image[(y * this->frameWidth + x) * 3 + 1] = 0;   // Green channel
