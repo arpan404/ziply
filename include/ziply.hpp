@@ -14,8 +14,8 @@ private:
     int frameHeight, frameWidth;
 
 public:
-    Ziply(std::string fileName, int frameWidth, int frameHeight);
-    
+    Ziply(const std::string &fileName, const int frameWidth, const int frameHeight);
+
 };
 
 #endif

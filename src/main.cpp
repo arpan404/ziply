@@ -22,6 +22,5 @@ int main(int argc, char *argv[])
 
     Parser parser;
 
-    parser.parse(arc, argv, fileNamePtr, outputFileNamePtr, passwordPtr, frameHeightPtr, frameWidthPtr, compressionPreventionPtr)
-    
+    parser.parse(argc, argv, fileNamePtr, outputFileNamePtr, passwordPtr, processingModePtr, frameHeightPtr, frameWidthPtr, compressionPreventionPtr);
 }
