@@ -9,8 +9,7 @@ Error::Error(const std::string message, std::string code)
 
 void Error::handle()
 {
-    std::cerr << "Error occured. For more info, see the error log below" << "\n";
-    std::cerr << "Error message: " << this->message << "\n";
-    std::cerr << "Error code:  " << this->code << "\n";
+    std::cerr << "\nZiply exited with error code '" << this->code << "'.\n\n";
+    std::cerr << this->message << "\n";
     exit(1);
 }
