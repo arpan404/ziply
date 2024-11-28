@@ -9,13 +9,13 @@
 class Ziply
 {
 private:
-    std::string *fileName;
-    std::string *filePath;
-    int *frameHeight, *frameWidth;
+    std::string fileName;
+    std::string filePath;
+    int frameHeight, frameWidth;
 
 public:
     Ziply(std::string fileName, int frameWidth, int frameHeight);
-    ~Ziply();
+    
 };
 
 #endif
