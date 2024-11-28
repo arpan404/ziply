@@ -62,7 +62,7 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
 
     size_t currentXaxis = 0, currentYaxis = 0, currentPixelIndex = 0;
     size_t totalPixelsToWrite = bytes_read * 8;
-
+    std::cout << totalPixelsToWrite << std::endl;
     for (size_t i = 0; i < bytes_read; ++i)
     {
         std::bitset<8> currentByte(buffer[i]);
@@ -70,20 +70,10 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
         {
 
             unsigned char color = currentByte[j] ? 0 : 255;
-            if (currentPixelIndex >= totalPixelsToWrite)
-            {
-                std::cout<<"Hello";
-                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 0] = 255; // Red channel
-                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 1] = 0;   // Green channel
-                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 2] = 0;   // Blue channel
-            }
-            else
-            {
-                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 0] = color; // Red channel
-                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 1] = color; // Green channel
-                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 2] = color; // Blue channel
-            }
 
+            image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 0] = color; // Red channel
+            image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 1] = color; // Green channel
+            image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 2] = color; // Blue channel
             ++currentXaxis;
             ++currentPixelIndex;
             if (currentXaxis >= this->frameWidth)
@@ -97,14 +87,23 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
             }
         }
     }
-    if (stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3))
+    if (currentPixelIndex >= totalPixelsToWrite)
     {
-        std::cout << "PNG image created successfully!" << std::endl;
+        int x = currentXaxis;
+        for (int y = currentYaxis; y < this->frameHeight; ++y)
+        {
+            for (x; x < this->frameWidth; ++x)
+            {
+                image[(y * this->frameWidth + x) * 3 + 0] = 255; // Red channel
+                image[(y * this->frameWidth + x) * 3 + 1] = 0;   // Green channel
+                image[(y * this->frameWidth + x) * 3 + 2] = 0;   // Blue channel
+            }
+
+            x = 0;
+        }
     }
-    else
-    {
-        std::cerr << "Error creating PNG image!" << std::endl;
-    }
+
+    stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3);
 
     // Clean up
     delete[] image;
