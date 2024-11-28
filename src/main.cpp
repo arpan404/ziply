@@ -1,9 +1,27 @@
 #include <iostream>
 #include "ziply.hpp"
+#include "parser.hpp"
 
-int main()
+int main(int argc, char *argv[])
 {
-    // File file = File("ff.png", 480, 480);
-    // file.convertToFrames();
-    std::cout << "Hello";
+    std::string fileName;
+    std::string outputFileName;
+    std::string password;
+    std::string processingMode;
+    int frameHeight, frameWidth;
+    float compressionPrevention;
+
+    // pointers
+    std::string *const fileNamePtr = &fileName;
+    std::string *const outputFileNamePtr = &outputFileName;
+    std::string *const passwordPtr = &password;
+    std::string *const processingModePtr = &processingMode;
+    int *const frameHeightPtr = &frameHeight;
+    int *const frameWidthPtr = &frameWidth;
+    float *const compressionPreventionPtr = &compressionPrevention;
+
+    Parser parser;
+
+    parser.parse(arc, argv, fileNamePtr, outputFileNamePtr, passwordPtr, frameHeightPtr, frameWidthPtr, compressionPreventionPtr)
+    
 }
