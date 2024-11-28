@@ -5,9 +5,8 @@
 #include <filesystem>
 #include <fstream>
 #include <bitset>
-// #include <Magick++.h>
 #include <thread>
-#include "Error.hpp"
+#include "error.hpp"
 #include "stb_image_write.h"
 
 namespace fs = std::filesystem;

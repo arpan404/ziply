@@ -1,5 +1,5 @@
-#include "File.hpp"
-#include "ThreadPool.hpp"
+#include "file.hpp"
+#include "threadpool.hpp"
 
 File::File(std::string fileName, int frameWidth, int frameHeight)
 {

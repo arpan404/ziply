@@ -1,4 +1,5 @@
-#include <Error.hpp>
+#include "error.hpp"
+
 Error::Error(const std::string message, std::string code)
 {
     this->message = message;
