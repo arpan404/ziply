@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 #include "error.hpp"
 
@@ -13,6 +14,7 @@ public:
 
 private:
     std::vector<std::string> params;
+    void displayHelpTexts();
 };
 
 #endif
