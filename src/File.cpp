@@ -60,20 +60,44 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
 
     unsigned char *image = new unsigned char[this->frameWidth * this->frameHeight * 3];
 
-    // Fill the image with black and white pixels
-    for (int y = 0; y < this->frameHeight; ++y)
+    size_t currentXaxis = 0, currentYaxis = 0, currentPixelIndex = 0;
+    size_t totalPixelsToWrite = bytes_read * 8;
+
+    for (size_t i = 0; i < bytes_read; ++i)
     {
-        for (int x = 0; x < this->frameWidth; ++x)
+        std::bitset<8> currentByte(buffer[i]);
+        for (int j = 0; j < 8; ++j)
         {
-            unsigned char color = ((x + y) % 2 == 0) ? 255 : 0; // Alternate black and white
-            image[(y * this->frameWidth + x) * 3 + 0] = color;  // Red channel
-            image[(y * this->frameWidth + x) * 3 + 1] = color;  // Green channel
-            image[(y * this->frameWidth + x) * 3 + 2] = color;  // Blue channel
+
+            unsigned char color = currentByte[j] ? 0 : 255;
+            if (currentPixelIndex >= totalPixelsToWrite)
+            {
+                std::cout<<"Hello";
+                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 0] = 255; // Red channel
+                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 1] = 0;   // Green channel
+                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 2] = 0;   // Blue channel
+            }
+            else
+            {
+                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 0] = color; // Red channel
+                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 1] = color; // Green channel
+                image[(currentYaxis * this->frameWidth + currentXaxis) * 3 + 2] = color; // Blue channel
+            }
+
+            ++currentXaxis;
+            ++currentPixelIndex;
+            if (currentXaxis >= this->frameWidth)
+            {
+                currentXaxis = 0;
+                ++currentYaxis;
+            }
+            if (currentYaxis >= this->frameHeight)
+            {
+                break;
+            }
         }
     }
-
-    // Write the image to a PNG file
-    if (stbi_write_png("output.png", this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3))
+    if (stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3))
     {
         std::cout << "PNG image created successfully!" << std::endl;
     }
@@ -85,63 +109,3 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
     // Clean up
     delete[] image;
 }
-// void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, std::string frameName)
-// {
-//     try
-//     {
-//         Magick::Image image(Magick::Geometry(this->frameWidth, this->frameHeight), "red");
-
-//         std::cout << frameName << std::flush;
-//         // Pre-calculate the number of pixels in the image (frameWidth * frameHeight)
-//         const size_t totalPixels = this->frameWidth * this->frameHeight;
-
-//         // Buffer the pixels in a temporary array instead of calling `pixelColor` for each one
-//         std::vector<std::string> pixelBuffer(totalPixels);
-
-//         size_t currentPixelIndex = 0;
-
-//         for (size_t i = 0; i < bytes_read; ++i)
-//         {
-//             std::bitset<8> currentByte(buffer[i]);
-
-//             for (int j = 0; j < 8; ++j)
-//             {
-//                 // Fill the pixel buffer with 'black' or 'white' for each bit
-//                 pixelBuffer[currentPixelIndex] = currentByte[j] ? "black" : "white";
-//                 ++currentPixelIndex;
-
-//                 // Check if we've reached the end of the image
-//                 if (currentPixelIndex >= totalPixels)
-//                 {
-//                     break;
-//                 }
-//             }
-//             if (currentPixelIndex >= totalPixels)
-//             {
-//                 break;
-//             }
-//         }
-
-//         // Now apply the buffered pixel data to the image all at once
-//         size_t currentXaxis = 0;
-//         size_t currentYaxis = 0;
-
-//         for (size_t i = 0; i < totalPixels; ++i)
-//         {
-//             image.pixelColor(currentXaxis, currentYaxis, pixelBuffer[i]);
-
-//             ++currentXaxis;
-//             if (currentXaxis >= this->frameWidth)
-//             {
-//                 currentXaxis = 0;
-//                 ++currentYaxis;
-//             }
-//         }
-
-//         image.write(frameName);
-//     }
-//     catch (const std::exception &e)
-//     {
-//         std::cerr << "Error generating frames: " << e.what() << std::endl;
-//     }
-// }

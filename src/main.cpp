@@ -4,6 +4,6 @@
 int main()
 {
     std::cout<<"calling"<<std::flush;
-    File file = File("ff.png", 2000, 2000);
+    File file = File("ff.png", 200, 200);
     file.convertToFrames();
 }
