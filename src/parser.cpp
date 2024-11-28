@@ -7,10 +7,9 @@ void Parser::parse(int argc, char *argv[], std::string *const fileName, std::str
     {
         throw new Error("No arguments passed. Trying using: ziply --help", "par-ex1");
     }
-    if (argc == 1)
+    if (argc == 2)
     {
-        std::cout<<argv[0];
-        if (std::string(argv[0]) == "--help")
+        if (std::string(argv[1]) == "--help")
         {
             std::cout << "Help";
         }
