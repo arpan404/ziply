@@ -3,6 +3,7 @@
 
 int main()
 {
-    File file = File("test.png", 1000, 1000);
+    std::cout<<"calling"<<std::flush;
+    File file = File("ff.png", 2000, 2000);
     file.convertToFrames();
 }

@@ -249,6 +249,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/stb_image_write.o: src/stb_image_write.cpp.o
+.PHONY : src/stb_image_write.o
+
+# target to build an object file
+src/stb_image_write.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/stb_image_write.cpp.o
+.PHONY : src/stb_image_write.cpp.o
+
+src/stb_image_write.i: src/stb_image_write.cpp.i
+.PHONY : src/stb_image_write.i
+
+# target to preprocess a source file
+src/stb_image_write.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/stb_image_write.cpp.i
+.PHONY : src/stb_image_write.cpp.i
+
+src/stb_image_write.s: src/stb_image_write.cpp.s
+.PHONY : src/stb_image_write.s
+
+# target to generate assembly for a file
+src/stb_image_write.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ziply.dir/build.make CMakeFiles/Ziply.dir/src/stb_image_write.cpp.s
+.PHONY : src/stb_image_write.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -273,6 +297,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/stb_image_write.o"
+	@echo "... src/stb_image_write.i"
+	@echo "... src/stb_image_write.s"
 .PHONY : help
 
 
