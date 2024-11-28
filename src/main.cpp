@@ -3,6 +3,6 @@
 
 int main()
 {
-    File file = File("ff.png", 1920, 1080);
+    File file = File("ff.png", 480, 480);
     file.convertToFrames();
 }
