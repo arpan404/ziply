@@ -43,6 +43,7 @@ void Parser::parse(int argc, char *argv[], bool *const convertingOrRestoring, st
 
 void Parser::validateArguments(bool *const convertingOrRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
 {
+    displayEnteredArguments(this);
 }
 
 void Parser::displayHelpTexts()
@@ -95,4 +96,14 @@ void Parser::displayHelpTexts()
               << "    Restores original data from 'example.mp4' to 'zipled', using GPU and the secret key 'mySecret'.\n";
 
     exit(0);
+}
+
+void displayEnteredArguments(Parser *parser)
+{
+    int length = parser->params.size();
+    for (int i = 0; i < length; i++)
+    {
+        std::cout << parser->params[i] << " ";
+    }
+    std::cout << "\n";
 }
