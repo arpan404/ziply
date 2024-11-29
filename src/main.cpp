@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
         std::string password = "ziplySecret";
         std::string processingMode;
         int frameHeight, frameWidth;
-        float compressionPrevention;
+        float bitPixelRatio;
         bool isRestoring;
 
         // pointers
@@ -22,11 +22,11 @@ int main(int argc, char *argv[])
         std::string *const processingModePtr = &processingMode;
         int *const frameHeightPtr = &frameHeight;
         int *const frameWidthPtr = &frameWidth;
-        float *const compressionPreventionPtr = &compressionPrevention;
+        float *const bitPixelRatioPtr = &bitPixelRatio;
         bool *const isRestoringPtr = &isRestoring;
 
         Parser parser;
-        parser.parse(argc, argv, isRestoringPtr, fileNamePtr, outputFileNamePtr, passwordPtr, processingModePtr, frameHeightPtr, frameWidthPtr, compressionPreventionPtr);
+        parser.parse(argc, argv, isRestoringPtr, fileNamePtr, outputFileNamePtr, passwordPtr, processingModePtr, frameHeightPtr, frameWidthPtr, bitPixelRatioPtr);
     }
     catch (Error *e)
     {

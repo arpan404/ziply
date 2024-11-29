@@ -1,6 +1,6 @@
 #include "parser.hpp"
 
-void Parser::parse(int argc, char *argv[], bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
+void Parser::parse(int argc, char *argv[], bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const bitPixelRatio)
 {
     if (argc < 2)
     {
@@ -38,10 +38,10 @@ void Parser::parse(int argc, char *argv[], bool *const isRestoring, std::string 
     {
         this->params.push_back(std::string(argv[i]));
     }
-    this->validateArguments(isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, compressionPrevention);
+    this->validateArguments(isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, bitPixelRatio);
 }
 
-void Parser::validateArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
+void Parser::validateArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const bitPixelRatio)
 {
     if (params[1] != "create" && params[1] != "restore")
     {
@@ -51,7 +51,7 @@ void Parser::validateArguments(bool *const isRestoring, std::string *const fileN
     }
     else
     {
-        if (params[1] == "convert")
+        if (params[1] == "create")
         {
             *isRestoring = false;
         }
@@ -59,12 +59,14 @@ void Parser::validateArguments(bool *const isRestoring, std::string *const fileN
         {
             *isRestoring = true;
         }
-        prepareArguments(isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, compressionPrevention);
+        prepareArguments(isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, bitPixelRatio);
     }
 }
 
-void Parser::prepareArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
+void Parser::prepareArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const bitPixelRatio)
 {
+    int argumentsListLength = params.size();
+    bool isInputFileProvided = false;
     if (*isRestoring)
     {
         std::unordered_set<std::string> availableArguments = {
@@ -73,7 +75,6 @@ void Parser::prepareArguments(bool *const isRestoring, std::string *const fileNa
             "-p",
             "-m"};
         int i = 2;
-        int argumentsListLength = params.size();
         while (i < argumentsListLength)
         {
             if (params[i][0] == '-')
@@ -82,17 +83,18 @@ void Parser::prepareArguments(bool *const isRestoring, std::string *const fileNa
                 {
                     if (i + 1 < argumentsListLength)
                     {
-                        if (availableArguments.find(params[i + 1]) == availableArguments.end() && params[i+1][0] == '-')
+                        if (availableArguments.find(params[i + 1]) == availableArguments.end() && params[i + 1][0] == '-')
                         {
                             displayEnteredArguments(this);
                             markErrorPart(i, this);
-                            throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex6");
+                            throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey1");
                         }
                         else
                         {
                             if (params[i] == "-f")
                             {
                                 *fileName = params[i + 1];
+                                isInputFileProvided = true;
                             }
 
                             if (params[i] == "-o")
@@ -106,7 +108,13 @@ void Parser::prepareArguments(bool *const isRestoring, std::string *const fileNa
                             }
                             if (params[i] == "-m")
                             {
-                                *password = params[i + 1];
+                                if (params[i + 1] != "cpu-single" || params[i + 1] != "cpu-multi" || params[i + 1] != "gpu" || params[i + 1] != "gpu-cpu")
+                                {
+                                    displayEnteredArguments(this);
+                                    markErrorPart(i, this);
+                                    throw new Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey2");
+                                }
+                                *processingMode = params[i];
                             }
                             i += 2;
                         }
@@ -115,26 +123,168 @@ void Parser::prepareArguments(bool *const isRestoring, std::string *const fileNa
                     {
                         displayEnteredArguments(this);
                         markErrorPart(i, this);
-                        throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex7");
+                        throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey3");
                     }
                 }
                 else
                 {
                     displayEnteredArguments(this);
                     markErrorPart(i, this);
-                    throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex8");
+                    throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey4");
                 }
             }
             else
             {
                 displayEnteredArguments(this);
                 markErrorPart(i, this);
-                throw new Error("Invalid argument '" + params[i] + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex9");
+                throw new Error("Invalid argument '" + params[i] + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey5");
+            }
+        }
+
+        if (!isInputFileProvided)
+        {
+            throw new Error("Expected a input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey6");
+        }
+    }
+
+    else
+    {
+
+        std::unordered_set<std::string> availableArguments = {
+            "-f",
+            "-o",
+            "-p",
+            "-m",
+            "-r",
+            "-c"};
+        int i = 2;
+        while (i < argumentsListLength)
+        {
+            if (params[i][0] == '-')
+            {
+                if (availableArguments.find(params[i]) != availableArguments.end())
+                {
+                    if (i + 1 < argumentsListLength)
+                    {
+                        if (availableArguments.find(params[i + 1]) == availableArguments.end() && params[i + 1][0] == '-')
+                        {
+                            displayEnteredArguments(this);
+                            markErrorPart(i, this);
+                            throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez1");
+                        }
+                        else
+                        {
+                            if (params[i] == "-f")
+                            {
+                                *fileName = params[i + 1];
+                                isInputFileProvided = true;
+                            }
+
+                            if (params[i] == "-o")
+                            {
+                                *outputFileName = params[i + 1];
+                            }
+
+                            if (params[i] == "-p")
+                            {
+                                *password = params[i + 1];
+                            }
+                            if (params[i] == "-m")
+                            {
+                                if (params[i + 1] != "cpu-single" || params[i + 1] != "cpu-multi" || params[i + 1] != "gpu" || params[i + 1] != "gpu-cpu")
+                                {
+                                    displayEnteredArguments(this);
+                                    markErrorPart(i + 1, this);
+                                    throw new Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez2");
+                                }
+                                *processingMode = params[i];
+                            }
+
+                            if (params[i] == "-r")
+                            {
+                                if (params[i + 1] != "1080p" || params[i + 1] != "360p" || params[i + 1] != "480p" || params[i + 1] != "720p" || params[i + 1] != "1440p" || params[i + 1] != "4k")
+                                {
+                                    displayEnteredArguments(this);
+                                    markErrorPart(i + 1, this);
+                                    throw new Error("Expected value: '360p' or '480p' or '720p' or '1080p' or '1440p' or '4k' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez3");
+                                }
+                                std::string res = params[i + 1];
+                                if (res == "360p")
+                                {
+                                    *frameWidth = 640;
+                                    *frameHeight = 360;
+                                }
+                                else if (res == "480p")
+                                {
+                                    *frameWidth = 854;
+                                    *frameHeight = 480;
+                                }
+                                else if (res == "720p")
+                                {
+                                    *frameWidth = 1280;
+                                    *frameHeight = 720;
+                                }
+                                else if (res == "1080p")
+                                {
+                                    *frameWidth = 1920;
+                                    *frameHeight = 1080;
+                                }
+                                else if (res == "1440p")
+                                {
+                                    *frameWidth = 2560;
+                                    *frameHeight = 1440;
+                                }
+                                else if (res == "4k")
+                                {
+                                    *frameWidth = 3840;
+                                    *frameHeight = 2160;
+                                }
+                                else
+                                {
+                                    *frameWidth = 1920;
+                                    *frameHeight = 1080;
+                                }
+                            }
+
+                            if (params[i] == "-c")
+                            {
+                                try
+                                {
+                                    int pixelToBitRatio = std::stoi(params[i + 1]);
+                                    std::cout << pixelToBitRatio;
+                                }
+                                catch (std::invalid_argument e)
+                                {
+                                    displayEnteredArguments(this);
+                                    markErrorPart(i + 1, this);
+                                    throw new Error("Invalid pixel to bit ratio provided, expected a number.\n\nFor detailed information, try running 'ziply --help'.", "par-ez4");
+                                }
+                            }
+                            i += 2;
+                        }
+                    }
+                    else
+                    {
+                        displayEnteredArguments(this);
+                        markErrorPart(i, this);
+                        throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez5");
+                    }
+                }
+                else
+                {
+                    displayEnteredArguments(this);
+                    markErrorPart(i, this);
+                    throw new Error("Invalid argument '" + params[i] + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
+                }
+            }
+
+            if (!isInputFileProvided)
+            {
+                throw new Error("Expected a input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
             }
         }
     }
 }
-
 void Parser::displayHelpTexts()
 {
     std::cout << "\n=== Ziply Command Options ===\n";
@@ -147,7 +297,7 @@ void Parser::displayHelpTexts()
 
     std::cout << "\nOptional Options:\n";
     std::cout << "  -o  <output_path> Path or name for the output file. (File extension is ignored if provided.)\n";
-    std::cout << "  -r  <resolution>  Output video resolution. Options: 480p, 720p, 1080p [default], 1440p, 4k.\n";
+    std::cout << "  -r  <resolution>  Output video resolution. Options: 360p, 480p, 720p, 1080p [default], 1440p, 4k.\n";
     std::cout << "  -p  <secret_key>  Secret key for encryption. [default: 'ziplySecret']\n";
     std::cout << "  -m  <mode>        Processing mode. Options:\n"
               << "                     - 'cpu-single': Single CPU core.\n"
