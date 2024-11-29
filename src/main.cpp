@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     std::string fileName;
     std::string outputFileName;
     std::string password = "ziplySecret";
-    std::string processingMode =;
+    std::string processingMode;
     int frameHeight, frameWidth;
     float compressionPrevention;
 
