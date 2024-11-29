@@ -59,6 +59,79 @@ void Parser::validateArguments(bool *const isRestoring, std::string *const fileN
         {
             *isRestoring = true;
         }
+        prepareArguments(isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, compressionPrevention);
+    }
+}
+
+void Parser::prepareArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
+{
+    if (*isRestoring)
+    {
+        std::unordered_set<std::string> availableArguments = {
+            "-f",
+            "-o",
+            "-p",
+            "-m"};
+        int i = 2;
+        int argumentsListLength = params.size();
+        while (i < argumentsListLength)
+        {
+            if (params[i][0] == '-')
+            {
+                if (availableArguments.find(params[i]) != availableArguments.end())
+                {
+                    if (i + 1 < argumentsListLength)
+                    {
+                        if (availableArguments.find(params[i + 1]) == availableArguments.end() && params[i+1][0] == '-')
+                        {
+                            displayEnteredArguments(this);
+                            markErrorPart(i, this);
+                            throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex6");
+                        }
+                        else
+                        {
+                            if (params[i] == "-f")
+                            {
+                                *fileName = params[i + 1];
+                            }
+
+                            if (params[i] == "-o")
+                            {
+                                *outputFileName = params[i + 1];
+                            }
+
+                            if (params[i] == "-p")
+                            {
+                                *password = params[i + 1];
+                            }
+                            if (params[i] == "-m")
+                            {
+                                *password = params[i + 1];
+                            }
+                            i += 2;
+                        }
+                    }
+                    else
+                    {
+                        displayEnteredArguments(this);
+                        markErrorPart(i, this);
+                        throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex7");
+                    }
+                }
+                else
+                {
+                    displayEnteredArguments(this);
+                    markErrorPart(i, this);
+                    throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex8");
+                }
+            }
+            else
+            {
+                displayEnteredArguments(this);
+                markErrorPart(i, this);
+                throw new Error("Invalid argument '" + params[i] + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex9");
+            }
+        }
     }
 }
 

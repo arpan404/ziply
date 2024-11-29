@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
         bool *const isRestoringPtr = &isRestoring;
 
         Parser parser;
-
         parser.parse(argc, argv, isRestoringPtr, fileNamePtr, outputFileNamePtr, passwordPtr, processingModePtr, frameHeightPtr, frameWidthPtr, compressionPreventionPtr);
     }
     catch (Error *e)
