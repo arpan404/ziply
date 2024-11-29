@@ -34,7 +34,7 @@ void Parser::parse(int argc, char *argv[], bool *const convertingOrRestoring, st
         }
     }
 
-    for (int i = 1; i < argc; i++)
+    for (int i = 0; i < argc; i++)
     {
         this->params.push_back(std::string(argv[i]));
     }
@@ -43,7 +43,12 @@ void Parser::parse(int argc, char *argv[], bool *const convertingOrRestoring, st
 
 void Parser::validateArguments(bool *const convertingOrRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
 {
-    displayEnteredArguments(this);
+    if (params[1] != "create" && params[1] != "restore")
+    {
+        displayEnteredArguments(this);
+        markErrorPart(2, this);
+        throw new Error("Invalid argument '" + params[1] + "'. Expected 'create' or 'restore', instead got '" + params[1] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex5");
+    }
 }
 
 void Parser::displayHelpTexts()
@@ -65,8 +70,8 @@ void Parser::displayHelpTexts()
               << "                     - 'cpu-multi': All CPU cores.\n"
               << "                     - 'gpu': Use GPU with CPU fallback. [default]\n"
               << "                     - 'gpu-cpu': Use GPU and all CPU cores.\n";
-    std::cout << "  -c  <ratio>       Compression prevention (pixel-to-bit ratio). [default: 1]\n"
-              << "                     Higher values increase the file size, suitable for compression-based platforms.\n";
+    std::cout << "  -c  <ratio>       Compression prevention (pixel-to-bit ratio). Options: 1[default], 2, 4, 8, 16.\n"
+              << "                    Higher values increase the file size, suitable for compression-based platforms.\n";
 
     std::cout << "\nExamples:\n";
     std::cout << "  ziply create -f example.zip\n"
@@ -106,4 +111,34 @@ void displayEnteredArguments(Parser *parser)
         std::cout << parser->params[i] << " ";
     }
     std::cout << "\n";
+}
+
+void markErrorPart(int index, Parser *parser)
+{
+    int totalLength = 0;
+    for (const std::string &str : parser->params)
+    {
+        totalLength += str.length();
+    }
+
+    totalLength += (parser->params.size() - 1);
+    int startingIndex = 0;
+    int i;
+    for (i = 0; i < index; i++)
+    {
+        startingIndex += parser->params[i].length();
+    }
+    startingIndex += i;
+    int endIndex = startingIndex + parser->params[index].length();
+    for (int j = 0; j < totalLength; j++)
+    {
+        if (j < startingIndex || j >= endIndex)
+        {
+            std::cout << " ";
+        }
+        else
+        {
+            std::cout << "^";
+        }
+    }
 }

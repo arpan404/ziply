@@ -16,7 +16,8 @@ private:
     std::vector<std::string> params;
     void validateArguments(bool *const convertingOrRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention);
     void displayHelpTexts();
-    friend void displayEnteredArguments(Parser* parser);
+    friend void displayEnteredArguments(Parser *parser);
+    friend void markErrorPart(int index, Parser *parser);
 };
 
 #endif
