@@ -1,6 +1,6 @@
 #include "parser.hpp"
 
-void Parser::parse(int argc, char *argv[], bool *const convertingOrRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
+void Parser::parse(int argc, char *argv[], bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
 {
     if (argc < 2)
     {
@@ -38,16 +38,27 @@ void Parser::parse(int argc, char *argv[], bool *const convertingOrRestoring, st
     {
         this->params.push_back(std::string(argv[i]));
     }
-    this->validateArguments(convertingOrRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, compressionPrevention);
+    this->validateArguments(isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, compressionPrevention);
 }
 
-void Parser::validateArguments(bool *const convertingOrRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
+void Parser::validateArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
 {
     if (params[1] != "create" && params[1] != "restore")
     {
         displayEnteredArguments(this);
-        markErrorPart(2, this);
+        markErrorPart(1, this);
         throw new Error("Invalid argument '" + params[1] + "'. Expected 'create' or 'restore', instead got '" + params[1] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex5");
+    }
+    else
+    {
+        if (params[1] == "convert")
+        {
+            *isRestoring = false;
+        }
+        else
+        {
+            *isRestoring = true;
+        }
     }
 }
 

@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
         std::string processingMode;
         int frameHeight, frameWidth;
         float compressionPrevention;
-        bool convertingOrRestoring;
+        bool isRestoring;
 
         // pointers
         std::string *const fileNamePtr = &fileName;
@@ -23,11 +23,11 @@ int main(int argc, char *argv[])
         int *const frameHeightPtr = &frameHeight;
         int *const frameWidthPtr = &frameWidth;
         float *const compressionPreventionPtr = &compressionPrevention;
-        bool *const convertingOrRestoringPtr = &convertingOrRestoring;
+        bool *const isRestoringPtr = &isRestoring;
 
         Parser parser;
 
-        parser.parse(argc, argv, convertingOrRestoringPtr, fileNamePtr, outputFileNamePtr, passwordPtr, processingModePtr, frameHeightPtr, frameWidthPtr, compressionPreventionPtr);
+        parser.parse(argc, argv, isRestoringPtr, fileNamePtr, outputFileNamePtr, passwordPtr, processingModePtr, frameHeightPtr, frameWidthPtr, compressionPreventionPtr);
     }
     catch (Error *e)
     {
