@@ -10,9 +10,9 @@ int main(int argc, char *argv[])
         std::string fileName;
         std::string outputFileName;
         std::string password = "ziplySecret";
-        std::string processingMode;
+        std::string processingMode = "cpu-multi";
         int frameHeight, frameWidth;
-        float bitPixelRatio;
+        float bitPixelRatio = 1;
         bool isRestoring;
 
         // pointers
