@@ -16,6 +16,8 @@ private:
 public:
     Ziply(const std::string &fileName, const int frameWidth, const int frameHeight);
 
+    void convert();
+    void restore();
 };
 
 #endif

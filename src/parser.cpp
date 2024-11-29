@@ -1,14 +1,7 @@
 #include "parser.hpp"
 
-void Parser::parse(int argc, char *argv[], std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
+void Parser::parse(int argc, char *argv[], bool *const convertingOrRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
 {
-    const std::unordered_set<std::string> availableCommands = {
-        "-f",
-        "-o",
-        "-r",
-        "-p",
-        "-m",
-        "-c"};
     if (argc < 2)
     {
         throw new Error("No arguments passed.\nIf you need help running ziply, run 'ziply --help'", "par-ex1");
@@ -23,14 +16,20 @@ void Parser::parse(int argc, char *argv[], std::string *const fileName, std::str
         }
         else
         {
-            if (availableCommands.find(command) != availableCommands.end())
+            if (command == "create")
             {
-                throw new Error("Invalid argument set. \n\nExample of a valid command:\nziply -f example.png -o zipled -r 1080p -p ziplySecret2 -m gpu -c 8\n\nFor detailed information on the available options, try running 'ziply --help'.",
+                throw new Error("Invalid argument set to create a zipled file.\n\nExample of a valid command:\nziply create -f example.png -o zipled -r 1080p -p ziplySecret2 -m gpu -c 8\n\nFor detailed information on the available options, try running 'ziply --help'.",
                                 "par-ex2");
+            }
+
+            else if (command == "restore")
+            {
+                throw new Error("Invalid argument set to restore data from zipled file.\n\nExample of a valid command:\nziply restore -f example.mp4 -o restored -p ziplySecret2 -m gpu\n\nFor detailed information on the available options, try running 'ziply --help'.",
+                                "par-ex3");
             }
             else
             {
-                throw new Error("Invalid argument '" + command + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex3");
+                throw new Error("Invalid argument '" + command + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex4");
             }
         }
     }
@@ -39,10 +38,10 @@ void Parser::parse(int argc, char *argv[], std::string *const fileName, std::str
     {
         this->params.push_back(std::string(argv[i]));
     }
-    this->validateArguments(fileName, outputFileName, password, processingMode, frameHeight, frameWidth, compressionPrevention);
+    this->validateArguments(convertingOrRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, compressionPrevention);
 }
 
-void Parser::validateArguments(std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
+void Parser::validateArguments(bool *const convertingOrRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const compressionPrevention)
 {
 }
 
