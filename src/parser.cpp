@@ -25,11 +25,12 @@ void Parser::parse(int argc, char *argv[], std::string *const fileName, std::str
         {
             if (availableCommands.find(command) != availableCommands.end())
             {
-                throw;
+                throw new Error("Invalid argument set. \n\nExample of a valid command:\nziply -f example.png -o zipled -r 1080p -p ziplySecret2 -m gpu -c 8\n\nFor detailed information on the available options, try running 'ziply --help'.",
+                                "par-ex2");
             }
             else
             {
-                throw new Error("Invalid argument '" + command + "' provided.\nIf you need help running ziply, run 'ziply --help'", "par-ex2");
+                throw new Error("Invalid argument '" + command + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex3");
             }
         }
     }
