@@ -4,7 +4,7 @@ void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileN
 {
     if (argc < 2)
     {
-        throw new Error("No arguments passed.\nIf you need help running ziply, run 'ziply --help'", "par-ex1");
+        throw Error("No arguments passed.\nIf you need help running ziply, run 'ziply --help'", "par-ex1");
     }
     if (argc == 2)
     {
@@ -18,18 +18,18 @@ void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileN
         {
             if (command == "create")
             {
-                throw new Error("Invalid argument set to create a zipled file.\n\nExample of a valid command:\nziply create -f example.png -o zipled -r 1080p -p ziplySecret2 -m gpu -c 8\n\nFor detailed information on the available options, try running 'ziply --help'.",
+                throw Error("Invalid argument set to create a zipled file.\n\nExample of a valid command:\nziply create -f example.png -o zipled -r 1080p -p ziplySecret2 -m gpu -c 8\n\nFor detailed information on the available options, try running 'ziply --help'.",
                                 "par-ex2");
             }
 
             else if (command == "restore")
             {
-                throw new Error("Invalid argument set to restore data from zipled file.\n\nExample of a valid command:\nziply restore -f example.mp4 -o restored -p ziplySecret2 -m gpu\n\nFor detailed information on the available options, try running 'ziply --help'.",
+                throw Error("Invalid argument set to restore data from zipled file.\n\nExample of a valid command:\nziply restore -f example.mp4 -o restored -p ziplySecret2 -m gpu\n\nFor detailed information on the available options, try running 'ziply --help'.",
                                 "par-ex3");
             }
             else
             {
-                throw new Error("Invalid argument '" + command + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex4");
+                throw Error("Invalid argument '" + command + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex4");
             }
         }
     }
@@ -47,7 +47,7 @@ void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::st
     {
         displayEnteredArguments(this);
         markErrorPart(1, this);
-        throw new Error("Invalid argument '" + params[1] + "'. Expected 'create' or 'restore', instead got '" + params[1] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex5");
+        throw Error("Invalid argument '" + params[1] + "'. Expected 'create' or 'restore', instead got '" + params[1] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ex5");
     }
     else
     {
@@ -87,7 +87,7 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                         {
                             displayEnteredArguments(this);
                             markErrorPart(i, this);
-                            throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey1");
+                            throw Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey1");
                         }
                         else
                         {
@@ -112,7 +112,7 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                                 {
                                     displayEnteredArguments(this);
                                     markErrorPart(i, this);
-                                    throw new Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey2");
+                                    throw Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey2");
                                 }
                                 processingMode = params[i + 1];
                             }
@@ -123,27 +123,27 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                     {
                         displayEnteredArguments(this);
                         markErrorPart(i, this);
-                        throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey3");
+                        throw Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey3");
                     }
                 }
                 else
                 {
                     displayEnteredArguments(this);
                     markErrorPart(i, this);
-                    throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey4");
+                    throw Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey4");
                 }
             }
             else
             {
                 displayEnteredArguments(this);
                 markErrorPart(i, this);
-                throw new Error("Invalid argument '" + params[i] + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey5");
+                throw Error("Invalid argument '" + params[i] + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey5");
             }
         }
 
         if (!isInputFileProvided)
         {
-            throw new Error("Expected an input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey6");
+            throw Error("Expected an input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey6");
         }
     }
     else
@@ -168,7 +168,7 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                         {
                             displayEnteredArguments(this);
                             markErrorPart(i, this);
-                            throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez1");
+                            throw Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez1");
                         }
                         else
                         {
@@ -193,7 +193,7 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                                 {
                                     displayEnteredArguments(this);
                                     markErrorPart(i + 1, this);
-                                    throw new Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez2");
+                                    throw Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez2");
                                 }
                                 processingMode = params[i + 1];
                             }
@@ -204,7 +204,7 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                                 {
                                     displayEnteredArguments(this);
                                     markErrorPart(i + 1, this);
-                                    throw new Error("Expected value: '360p' or '480p' or '720p' or '1080p' or '1440p' or '4k' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez3");
+                                    throw Error("Expected value: '360p' or '480p' or '720p' or '1080p' or '1440p' or '4k' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez3");
                                 }
                                 std::string res = params[i + 1];
                                 if (res == "360p")
@@ -255,7 +255,7 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                                 {
                                     displayEnteredArguments(this);
                                     markErrorPart(i + 1, this);
-                                    throw new Error("Invalid pixel to bit ratio provided, expected a number.\n\nFor detailed information, try running 'ziply --help'.", "par-ez4");
+                                    throw Error("Invalid pixel to bit ratio provided, expected a number.\n\nFor detailed information, try running 'ziply --help'.", "par-ez4");
                                 }
                             }
                             i += 2;
@@ -265,20 +265,20 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                     {
                         displayEnteredArguments(this);
                         markErrorPart(i, this);
-                        throw new Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez5");
+                        throw Error("Expected a value after '" + params[i] + "', but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez5");
                     }
                 }
                 else
                 {
                     displayEnteredArguments(this);
                     markErrorPart(i, this);
-                    throw new Error("Invalid argument '" + params[i] + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
+                    throw Error("Invalid argument '" + params[i] + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
                 }
             }
 
             if (!isInputFileProvided)
             {
-                throw new Error("Expected an input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
+                throw Error("Expected an input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
             }
         }
     }

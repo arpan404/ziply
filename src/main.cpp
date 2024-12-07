@@ -24,9 +24,8 @@ int main(int argc, char *argv[])
         else
             ziply.convert();
     }
-    catch (Error *e)
+    catch (const Error &e)
     {
-        e->handle();
-        delete e;
+        e.handle();
     }
 }
