@@ -1,6 +1,6 @@
 #include "parser.hpp"
 
-void Parser::parse(int argc, char *argv[], bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const bitPixelRatio)
+void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, std::string &processingMode, int &frameHeight, int &frameWidth, float &bitPixelRatio)
 {
     if (argc < 2)
     {
@@ -41,7 +41,7 @@ void Parser::parse(int argc, char *argv[], bool *const isRestoring, std::string 
     this->validateArguments(isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, bitPixelRatio);
 }
 
-void Parser::validateArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const bitPixelRatio)
+void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, std::string &processingMode, int &frameHeight, int &frameWidth, float &bitPixelRatio)
 {
     if (params[1] != "create" && params[1] != "restore")
     {
@@ -53,21 +53,21 @@ void Parser::validateArguments(bool *const isRestoring, std::string *const fileN
     {
         if (params[1] == "create")
         {
-            *isRestoring = false;
+            isRestoring = false;
         }
         else
         {
-            *isRestoring = true;
+            isRestoring = true;
         }
         prepareArguments(isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, bitPixelRatio);
     }
 }
 
-void Parser::prepareArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const bitPixelRatio)
+void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, std::string &processingMode, int &frameHeight, int &frameWidth, float &bitPixelRatio)
 {
     int argumentsListLength = params.size();
     bool isInputFileProvided = false;
-    if (*isRestoring)
+    if (isRestoring)
     {
         std::unordered_set<std::string> availableArguments = {
             "-f",
@@ -93,28 +93,28 @@ void Parser::prepareArguments(bool *const isRestoring, std::string *const fileNa
                         {
                             if (params[i] == "-f")
                             {
-                                *fileName = params[i + 1];
+                                fileName = params[i + 1];
                                 isInputFileProvided = true;
                             }
 
                             if (params[i] == "-o")
                             {
-                                *outputFileName = params[i + 1];
+                                outputFileName = params[i + 1];
                             }
 
                             if (params[i] == "-p")
                             {
-                                *password = params[i + 1];
+                                password = params[i + 1];
                             }
                             if (params[i] == "-m")
                             {
-                                if (params[i + 1] != "cpu-single" || params[i + 1] != "cpu-multi" || params[i + 1] != "gpu" || params[i + 1] != "gpu-cpu")
+                                if (params[i + 1] != "cpu-single" && params[i + 1] != "cpu-multi" && params[i + 1] != "gpu" && params[i + 1] != "gpu-cpu")
                                 {
                                     displayEnteredArguments(this);
                                     markErrorPart(i, this);
                                     throw new Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey2");
                                 }
-                                *processingMode = params[i];
+                                processingMode = params[i + 1];
                             }
                             i += 2;
                         }
@@ -143,13 +143,11 @@ void Parser::prepareArguments(bool *const isRestoring, std::string *const fileNa
 
         if (!isInputFileProvided)
         {
-            throw new Error("Expected a input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey6");
+            throw new Error("Expected an input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey6");
         }
     }
-
     else
     {
-
         std::unordered_set<std::string> availableArguments = {
             "-f",
             "-o",
@@ -176,33 +174,33 @@ void Parser::prepareArguments(bool *const isRestoring, std::string *const fileNa
                         {
                             if (params[i] == "-f")
                             {
-                                *fileName = params[i + 1];
+                                fileName = params[i + 1];
                                 isInputFileProvided = true;
                             }
 
                             if (params[i] == "-o")
                             {
-                                *outputFileName = params[i + 1];
+                                outputFileName = params[i + 1];
                             }
 
                             if (params[i] == "-p")
                             {
-                                *password = params[i + 1];
+                                password = params[i + 1];
                             }
                             if (params[i] == "-m")
                             {
-                                if (params[i + 1] != "cpu-single" || params[i + 1] != "cpu-multi" || params[i + 1] != "gpu" || params[i + 1] != "gpu-cpu")
+                                if (params[i + 1] != "cpu-single" && params[i + 1] != "cpu-multi" && params[i + 1] != "gpu" && params[i + 1] != "gpu-cpu")
                                 {
                                     displayEnteredArguments(this);
                                     markErrorPart(i + 1, this);
                                     throw new Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez2");
                                 }
-                                *processingMode = params[i];
+                                processingMode = params[i + 1];
                             }
 
                             if (params[i] == "-r")
                             {
-                                if (params[i + 1] != "1080p" || params[i + 1] != "360p" || params[i + 1] != "480p" || params[i + 1] != "720p" || params[i + 1] != "1440p" || params[i + 1] != "4k")
+                                if (params[i + 1] != "1080p" && params[i + 1] != "360p" && params[i + 1] != "480p" && params[i + 1] != "720p" && params[i + 1] != "1440p" && params[i + 1] != "4k")
                                 {
                                     displayEnteredArguments(this);
                                     markErrorPart(i + 1, this);
@@ -211,38 +209,38 @@ void Parser::prepareArguments(bool *const isRestoring, std::string *const fileNa
                                 std::string res = params[i + 1];
                                 if (res == "360p")
                                 {
-                                    *frameWidth = 640;
-                                    *frameHeight = 360;
+                                    frameWidth = 640;
+                                    frameHeight = 360;
                                 }
                                 else if (res == "480p")
                                 {
-                                    *frameWidth = 854;
-                                    *frameHeight = 480;
+                                    frameWidth = 854;
+                                    frameHeight = 480;
                                 }
                                 else if (res == "720p")
                                 {
-                                    *frameWidth = 1280;
-                                    *frameHeight = 720;
+                                    frameWidth = 1280;
+                                    frameHeight = 720;
                                 }
                                 else if (res == "1080p")
                                 {
-                                    *frameWidth = 1920;
-                                    *frameHeight = 1080;
+                                    frameWidth = 1920;
+                                    frameHeight = 1080;
                                 }
                                 else if (res == "1440p")
                                 {
-                                    *frameWidth = 2560;
-                                    *frameHeight = 1440;
+                                    frameWidth = 2560;
+                                    frameHeight = 1440;
                                 }
                                 else if (res == "4k")
                                 {
-                                    *frameWidth = 3840;
-                                    *frameHeight = 2160;
+                                    frameWidth = 3840;
+                                    frameHeight = 2160;
                                 }
                                 else
                                 {
-                                    *frameWidth = 1920;
-                                    *frameHeight = 1080;
+                                    frameWidth = 1920;
+                                    frameHeight = 1080;
                                 }
                             }
 
@@ -280,11 +278,12 @@ void Parser::prepareArguments(bool *const isRestoring, std::string *const fileNa
 
             if (!isInputFileProvided)
             {
-                throw new Error("Expected a input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
+                throw new Error("Expected an input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
             }
         }
     }
 }
+
 void Parser::displayHelpTexts()
 {
     std::cout << "\n=== Ziply Command Options ===\n";

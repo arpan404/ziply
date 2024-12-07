@@ -15,18 +15,8 @@ int main(int argc, char *argv[])
         float bitPixelRatio = 1;
         bool isRestoring;
 
-        // pointers
-        std::string *const fileNamePtr = &fileName;
-        std::string *const outputFileNamePtr = &outputFileName;
-        std::string *const passwordPtr = &password;
-        std::string *const processingModePtr = &processingMode;
-        int *const frameHeightPtr = &frameHeight;
-        int *const frameWidthPtr = &frameWidth;
-        float *const bitPixelRatioPtr = &bitPixelRatio;
-        bool *const isRestoringPtr = &isRestoring;
-
         Parser parser;
-        parser.parse(argc, argv, isRestoringPtr, fileNamePtr, outputFileNamePtr, passwordPtr, processingModePtr, frameHeightPtr, frameWidthPtr, bitPixelRatioPtr);
+        parser.parse(argc, argv, isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, bitPixelRatio);
     }
     catch (Error *e)
     {

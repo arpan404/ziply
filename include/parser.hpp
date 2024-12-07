@@ -10,12 +10,12 @@
 class Parser
 {
 public:
-    void parse(int argc, char *argv[], bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const bitPixelRatio);
+    void parse(int argc, char *argv[], bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, std::string &processingMode, int &frameHeight, int &frameWidth, float &bitPixelRatio);
 
 private:
     std::vector<std::string> params;
-    void validateArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const bitPixelRatio);
-    void prepareArguments(bool *const isRestoring, std::string *const fileName, std::string *const outputFileName, std::string *const password, std::string *const processingMode, int *const frameHeight, int *const frameWidth, float *const bitPixelRatio);
+    void validateArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, std::string &processingMode, int &frameHeight, int &frameWidth, float &bitPixelRatio);
+    void prepareArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, std::string &processingMode, int &frameHeight, int &frameWidth, float &bitPixelRatio);
     void displayHelpTexts();
     friend void displayEnteredArguments(Parser *parser);
     friend void markErrorPart(int index, Parser *parser);
