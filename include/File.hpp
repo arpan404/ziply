@@ -6,7 +6,8 @@
 namespace fs = std::filesystem;
 namespace file
 {
-    std::vector<fs::path> getFilePath(const std::string &inputFileName, const std::string &outputFileName);
+    bool pathExists(const std::string &path);
+    std::vector<fs::path> getConvertFilePath(const std::string &inputFileName, const std::string &outputFileName);
 }
 
 #endif

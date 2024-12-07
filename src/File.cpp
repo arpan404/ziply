@@ -1,11 +1,16 @@
 #include "file.hpp"
 
-vector<fs::path> file::getFilePath(const std::string &inputFileName, const std::string &outputFileName)
+bool file::pathExists(const std::string &path)
+{
+    return fs::exists(path);
+}
+
+vector<fs::path> file::getConvertFilePath(const std::string &inputFileName, const std::string &outputFileName)
 {
     vector<fs::path> paths;
     fs::path inputFilePath = fs::absolute(inputFileName);
 
-    if (fs::exists(inputFilePath))
+    if (file::pathExists(inputFilePath))
     {
         paths.push_back(inputFilePath);
     }
@@ -15,7 +20,7 @@ vector<fs::path> file::getFilePath(const std::string &inputFileName, const std::
     }
 
     fs::path outputFilePath = fs::absolute(outputFileName);
-    if (fs::exists(outputFilePath))
+    if (file::pathExists(outputFilePath))
     {
         throw Error("Output file already exists.", "file-e-z2");
     }
