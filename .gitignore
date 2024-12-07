@@ -6,3 +6,4 @@ ziply
 .vscode/
 .DS_Store
 test.png
+build/
