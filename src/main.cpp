@@ -17,6 +17,12 @@ int main(int argc, char *argv[])
 
         Parser parser;
         parser.parse(argc, argv, isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, bitPixelRatio);
+
+        Ziply ziply(fileName, frameWidth, frameHeight);
+        if (isRestoring)
+            ziply.restore();
+        else
+            ziply.convert();
     }
     catch (Error *e)
     {
