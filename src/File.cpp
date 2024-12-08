@@ -1,4 +1,6 @@
 #include "file.hpp"
+#include "error.hpp"
+#include <vector>
 
 bool file::pathExists(const std::string &path)
 {
@@ -10,9 +12,9 @@ fs::path file::getAbsolutePath(const std::string &path)
     return fs::absolute(path);
 }
 
-vector<fs::path> file::getConvertFilePath(const std::string &inputFileName, const std::string &outputFileName)
+std::vector<fs::path> file::getConvertFilePath(const std::string &inputFileName, const std::string &outputFileName)
 {
-    vector<fs::path> paths;
+    std::vector<fs::path> paths;
     fs::path inputFilePath = file::getAbsolutePath(inputFileName);
 
     if (file::pathExists(inputFilePath))
@@ -25,11 +27,11 @@ vector<fs::path> file::getConvertFilePath(const std::string &inputFileName, cons
     }
 
     fs::path outputFilePath = file::getAbsolutePath(outputFileName);
-    if (file::pathExists(outputFilePath))
-    {
-        throw Error("Output file '" + outputFileName + "' already exists.", "file-e-z2");
-    }
 
+    if (outputFileName.empty())
+    {
+        outputFilePath = inputFilePath;
+    }
     outputFilePath.replace_extension(".mp4");
     if (file::pathExists(outputFilePath))
     {

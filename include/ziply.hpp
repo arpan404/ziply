@@ -3,9 +3,6 @@
 
 #include <string>
 
-#include "file.hpp"
-#include "error.hpp"
-
 class Ziply
 {
 private:

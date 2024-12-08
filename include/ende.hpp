@@ -13,6 +13,10 @@
 #include <vector>
 #include "error.hpp"
 
+constexpr size_t PBKDF2_ITERATIONS = 10000;  // Recommended minimum iterations for PBKDF2
+constexpr size_t IV_OFFSET = 32;             // Assuming this is the offset where IV starts in the key
+constexpr size_t IV_SIZE = 16;               // Standard IV size for AES
+
 // Class Ende handles encryption and decryption of data using AES and LZMA compression
 class Ende
 {
