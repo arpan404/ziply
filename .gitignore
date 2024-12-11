@@ -7,3 +7,5 @@ ziply
 .DS_Store
 test.png
 build/
+*.zip
+*.ziply
