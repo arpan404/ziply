@@ -11,10 +11,9 @@ private:
     int frameHeight, frameWidth;
     float bitPixelRatio;
     std::string password;
-    std::string processingMode;
 
 public:
-    Ziply(const std::string &fileName, const std::string &outputFileName, const std::string &password, const std::string &processingMode, const int frameWidth, const int frameHeight, float bitPixelRatio);
+    Ziply(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, float bitPixelRatio);
 
     void convert();
     void restore();

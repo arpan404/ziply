@@ -1,9 +1,4 @@
 #include "ende.hpp"
-#include <iostream>
-#include <iomanip>
-#include <thread>
-#include <future>
-#include "threadpool.hpp"
 
 Ende::EncryptionParams Ende::deriveKey(const std::string &password, const std::array<uint8_t, SALT_SIZE> &salt)
 {
@@ -25,33 +20,15 @@ Ende::EncryptionParams Ende::deriveKey(const std::string &password, const std::a
 
 std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const EncryptionParams &params)
 {
-#ifdef __AES__
-
-#endif
-
     std::vector<uint8_t> encryptedData;
-    encryptedData.resize(data.size());
-
-    static const size_t AES_ALIGN = 16;
-    if (reinterpret_cast<uintptr_t>(encryptedData.data()) % AES_ALIGN != 0)
-    {
-        encryptedData.reserve(encryptedData.size() + AES_ALIGN);
-    }
+    encryptedData.resize(data.size() + EVP_MAX_BLOCK_LENGTH);
 
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx)
         throw Error("Failed to create encryption context", "error-ende-enc1");
 
-    EVP_CIPHER *cipher = EVP_CIPHER_fetch(nullptr, "AES-128-CTR", nullptr);
-    if (!cipher)
+    if (!EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, params.key.data(), params.iv.data()))
     {
-        const EVP_CIPHER *const_cipher = EVP_aes_128_ctr();
-        cipher = const_cast<EVP_CIPHER*>(const_cipher);
-    }
-
-    if (!EVP_EncryptInit_ex2(ctx, cipher, params.key.data(), params.iv.data(), nullptr))
-    {
-        EVP_CIPHER_free(cipher);
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed to initialize encryption", "error-ende-enc2");
     }
@@ -59,7 +36,6 @@ std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const Encry
     int len = 0;
     if (!EVP_EncryptUpdate(ctx, encryptedData.data(), &len, data.data(), data.size()))
     {
-        EVP_CIPHER_free(cipher);
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed during encryption", "error-ende-enc3");
     }
@@ -67,20 +43,52 @@ std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const Encry
     int finalLen = 0;
     if (!EVP_EncryptFinal_ex(ctx, encryptedData.data() + len, &finalLen))
     {
-        EVP_CIPHER_free(cipher);
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed to finalize encryption", "error-ende-enc4");
     }
 
     encryptedData.resize(len + finalLen);
-    EVP_CIPHER_free(cipher);
     EVP_CIPHER_CTX_free(ctx);
     return encryptedData;
+}
+
+std::vector<uint8_t> Ende::decrypt(const std::vector<uint8_t> &data, const EncryptionParams &params)
+{
+    std::vector<uint8_t> decryptedData(data.size());
+
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx)
+        throw Error("Failed to create decryption context", "error-ende-dec1");
+
+    if (!EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, params.key.data(), params.iv.data()))
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        throw Error("Failed to initialize decryption", "error-ende-dec2");
+    }
+
+    int len = 0;
+    if (!EVP_DecryptUpdate(ctx, decryptedData.data(), &len, data.data(), data.size()))
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        throw Error("Failed during decryption", "error-ende-dec3");
+    }
+
+    int finalLen = 0;
+    if (!EVP_DecryptFinal_ex(ctx, decryptedData.data() + len, &finalLen))
+    {
+        EVP_CIPHER_CTX_free(ctx);
+        throw Error("Failed to finalize decryption", "error-ende-dec4");
+    }
+
+    decryptedData.resize(len + finalLen);
+    EVP_CIPHER_CTX_free(ctx);
+    return decryptedData;
 }
 
 bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::string &outputFilePath,
                               const std::string &password, uint32_t compressionLevel)
 {
+
     std::ifstream inputFile(inputFilePath, std::ios::binary | std::ios::ate);
     if (!inputFile)
         throw Error("Failed to open input file", "error-ende-input");
@@ -90,69 +98,28 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
     inputFile.read(reinterpret_cast<char *>(inputData.data()), inputData.size());
     inputFile.close();
 
-    // Create thread pool with hardware concurrency
-    ThreadPool pool(std::thread::hardware_concurrency());
+    lzma_stream strm = LZMA_STREAM_INIT;
+    lzma_ret ret = lzma_easy_encoder(&strm, compressionLevel, LZMA_CHECK_CRC64);
+    if (ret != LZMA_OK)
+        throw Error("Failed to initialize LZMA encoder", "error-ende-compress");
 
-    // Split data into chunks
-    const size_t chunkSize = inputData.size() / std::thread::hardware_concurrency();
-    std::vector<std::vector<uint8_t>> compressedChunks(std::thread::hardware_concurrency());
-
-    for (size_t i = 0; i < std::thread::hardware_concurrency(); i++)
-    {
-        size_t offset = i * chunkSize;
-        size_t currentChunkSize = std::min(chunkSize, inputData.size() - offset);
-
-        pool.enqueue([&inputData, &compressedChunks, i, offset, currentChunkSize, compressionLevel]()
-        {
-            std::vector<uint8_t> chunk(inputData.begin() + offset, 
-                                     inputData.begin() + offset + currentChunkSize);
-            
-            lzma_stream strm = LZMA_STREAM_INIT;
-            lzma_ret ret = lzma_easy_encoder(&strm, compressionLevel, LZMA_CHECK_CRC64);
-            if (ret != LZMA_OK)
-                throw Error("Failed to initialize LZMA encoder", "error-ende-compress");
-
-            std::vector<uint8_t> compressedChunk;
-            compressedChunk.resize(chunk.size() + BUFFER_SIZE);
-
-            strm.next_in = chunk.data();
-            strm.avail_in = chunk.size();
-            strm.next_out = compressedChunk.data();
-            strm.avail_out = compressedChunk.size();
-
-            while (strm.avail_in > 0) {
-                ret = lzma_code(&strm, LZMA_RUN);
-                if (ret != LZMA_OK) {
-                    lzma_end(&strm);
-                    throw Error("Compression failed", "error-ende-compress");
-                }
-            }
-
-            ret = lzma_code(&strm, LZMA_FINISH);
-            if (ret != LZMA_STREAM_END) {
-                lzma_end(&strm);
-                throw Error("Compression failed", "error-ende-compress-end");
-            }
-
-            compressedChunk.resize(compressedChunk.size() - strm.avail_out);
-            lzma_end(&strm);
-            compressedChunks[i] = compressedChunk;
-        });
-    }
-
-    // Combine all compressed chunks
     std::vector<uint8_t> compressedData;
-    size_t totalCompressedSize = 0;
-    for (const auto &chunk : compressedChunks)
+    compressedData.resize(inputData.size() + BUFFER_SIZE);
+
+    strm.next_in = inputData.data();
+    strm.avail_in = inputData.size();
+    strm.next_out = compressedData.data();
+    strm.avail_out = compressedData.size();
+
+    ret = lzma_code(&strm, LZMA_FINISH);
+    if (ret != LZMA_STREAM_END)
     {
-        totalCompressedSize += chunk.size();
+        lzma_end(&strm);
+        throw Error("Compression failed", "error-ende-compress-end");
     }
 
-    compressedData.reserve(totalCompressedSize);
-    for (const auto &chunk : compressedChunks)
-    {
-        compressedData.insert(compressedData.end(), chunk.begin(), chunk.end());
-    }
+    compressedData.resize(compressedData.size() - strm.avail_out);
+    lzma_end(&strm);
 
     std::array<uint8_t, SALT_SIZE> salt;
     if (!RAND_bytes(salt.data(), salt.size()))
@@ -215,13 +182,9 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
     if (!outputFile)
         throw Error("Failed to open output file", "error-ende-output");
 
-    size_t totalIn = compressedData.size();
-    size_t processedIn = 0;
-
     do
     {
         ret = lzma_code(&strm, LZMA_FINISH);
-        processedIn = totalIn - strm.avail_in;
         if (strm.avail_out == 0 || ret == LZMA_STREAM_END)
         {
             size_t written = outputData.size() - strm.avail_out;
@@ -230,8 +193,6 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
             strm.avail_out = outputData.size();
         }
     } while (ret == LZMA_OK);
-
-    std::cout << std::endl; // New line after progress
 
     if (ret != LZMA_STREAM_END)
     {

@@ -10,15 +10,14 @@ int main(int argc, char *argv[])
         std::string fileName;
         std::string outputFileName;
         std::string password = "ziplySecret";
-        std::string processingMode = "cpu-multi";
         int frameHeight, frameWidth;
         float bitPixelRatio = 1;
         bool isRestoring;
 
         Parser parser;
-        parser.parse(argc, argv, isRestoring, fileName, outputFileName, password, processingMode, frameHeight, frameWidth, bitPixelRatio);
+        parser.parse(argc, argv, isRestoring, fileName, outputFileName, password, frameHeight, frameWidth, bitPixelRatio);
 
-        Ziply ziply(fileName, outputFileName, password, processingMode, frameWidth, frameHeight, bitPixelRatio);
+        Ziply ziply(fileName, outputFileName, password, frameWidth, frameHeight, bitPixelRatio);
         if (isRestoring)
             ziply.restore();
         else

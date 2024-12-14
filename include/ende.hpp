@@ -1,6 +1,3 @@
-#ifndef ENDE_HPP
-#define ENDE_HPP
-
 #include <array>
 #include <fstream>
 #include <lzma.h>
@@ -40,5 +37,3 @@ private:
     static std::vector<uint8_t> encrypt(const std::vector<uint8_t> &data, const EncryptionParams &params);
     static std::vector<uint8_t> decrypt(const std::vector<uint8_t> &data, const EncryptionParams &params);
 };
-
-#endif
