@@ -1,9 +1,5 @@
 #include "ende.hpp"
 #include <iostream>
-#include <iomanip>
-#include <thread>
-#include <future>
-#include "threadpool.hpp"
 
 Ende::EncryptionParams Ende::deriveKey(const std::string &password, const std::array<uint8_t, SALT_SIZE> &salt)
 {
@@ -45,8 +41,7 @@ std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const Encry
     EVP_CIPHER *cipher = EVP_CIPHER_fetch(nullptr, "AES-128-CTR", nullptr);
     if (!cipher)
     {
-        const EVP_CIPHER *const_cipher = EVP_aes_128_ctr();
-        cipher = const_cast<EVP_CIPHER*>(const_cipher);
+        cipher = EVP_aes_128_ctr();
     }
 
     if (!EVP_EncryptInit_ex2(ctx, cipher, params.key.data(), params.iv.data(), nullptr))
@@ -55,6 +50,8 @@ std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const Encry
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed to initialize encryption", "error-ende-enc2");
     }
+
+    EVP_CIPHER_CTX_set_num_threads(ctx, 4);
 
     int len = 0;
     if (!EVP_EncryptUpdate(ctx, encryptedData.data(), &len, data.data(), data.size()))
@@ -95,15 +92,15 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
 
     // Split data into chunks
     const size_t chunkSize = inputData.size() / std::thread::hardware_concurrency();
-    std::vector<std::vector<uint8_t>> compressedChunks(std::thread::hardware_concurrency());
+    std::vector<std::future<std::vector<uint8_t>>> futures;
+    std::vector<std::vector<uint8_t>> compressedChunks;
 
-    for (size_t i = 0; i < std::thread::hardware_concurrency(); i++)
+    for (size_t offset = 0; offset < inputData.size(); offset += chunkSize)
     {
-        size_t offset = i * chunkSize;
         size_t currentChunkSize = std::min(chunkSize, inputData.size() - offset);
 
-        pool.enqueue([&inputData, &compressedChunks, i, offset, currentChunkSize, compressionLevel]()
-        {
+        futures.push_back(pool.enqueue([=, &inputData, compressionLevel]()
+                                       {
             std::vector<uint8_t> chunk(inputData.begin() + offset, 
                                      inputData.begin() + offset + currentChunkSize);
             
@@ -136,18 +133,21 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
 
             compressedChunk.resize(compressedChunk.size() - strm.avail_out);
             lzma_end(&strm);
-            compressedChunks[i] = compressedChunk;
-        });
+            return compressedChunk; }));
+    }
+
+    // Collect results
+    std::vector<uint8_t> compressedData;
+    size_t totalCompressedSize = 0;
+
+    for (auto &future : futures)
+    {
+        auto chunk = future.get();
+        totalCompressedSize += chunk.size();
+        compressedChunks.push_back(std::move(chunk));
     }
 
     // Combine all compressed chunks
-    std::vector<uint8_t> compressedData;
-    size_t totalCompressedSize = 0;
-    for (const auto &chunk : compressedChunks)
-    {
-        totalCompressedSize += chunk.size();
-    }
-
     compressedData.reserve(totalCompressedSize);
     for (const auto &chunk : compressedChunks)
     {
@@ -169,77 +169,6 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
 
     outputFile.write(reinterpret_cast<char *>(salt.data()), salt.size());
     outputFile.write(reinterpret_cast<char *>(encryptedData.data()), encryptedData.size());
-    outputFile.close();
-
-    return true;
-}
-
-bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::string &outputFilePath,
-                                const std::string &password)
-{
-
-    std::ifstream inputFile(inputFilePath, std::ios::binary | std::ios::ate);
-    if (!inputFile)
-        throw Error("Failed to open input file", "error-ende-input");
-
-    size_t fileSize = static_cast<size_t>(inputFile.tellg());
-    inputFile.seekg(0);
-
-    if (fileSize < SALT_SIZE)
-    {
-        throw Error("Invalid file format", "error-ende-file-size");
-    }
-
-    std::array<uint8_t, SALT_SIZE> salt;
-    inputFile.read(reinterpret_cast<char *>(salt.data()), SALT_SIZE);
-
-    std::vector<uint8_t> encryptedData(fileSize - SALT_SIZE);
-    inputFile.read(reinterpret_cast<char *>(encryptedData.data()), encryptedData.size());
-    inputFile.close();
-
-    Ende::EncryptionParams params = deriveKey(password, salt);
-    std::vector<uint8_t> compressedData = decrypt(encryptedData, params);
-
-    lzma_stream strm = LZMA_STREAM_INIT;
-    lzma_ret ret = lzma_auto_decoder(&strm, UINT64_MAX, LZMA_CONCATENATED);
-    if (ret != LZMA_OK)
-        throw Error("Failed to initialize LZMA decoder", "error-ende-decompress");
-
-    std::vector<uint8_t> outputData(BUFFER_SIZE);
-    strm.next_in = compressedData.data();
-    strm.avail_in = compressedData.size();
-    strm.next_out = outputData.data();
-    strm.avail_out = outputData.size();
-
-    std::ofstream outputFile(outputFilePath, std::ios::binary);
-    if (!outputFile)
-        throw Error("Failed to open output file", "error-ende-output");
-
-    size_t totalIn = compressedData.size();
-    size_t processedIn = 0;
-
-    do
-    {
-        ret = lzma_code(&strm, LZMA_FINISH);
-        processedIn = totalIn - strm.avail_in;
-        if (strm.avail_out == 0 || ret == LZMA_STREAM_END)
-        {
-            size_t written = outputData.size() - strm.avail_out;
-            outputFile.write(reinterpret_cast<char *>(outputData.data()), written);
-            strm.next_out = outputData.data();
-            strm.avail_out = outputData.size();
-        }
-    } while (ret == LZMA_OK);
-
-    std::cout << std::endl; // New line after progress
-
-    if (ret != LZMA_STREAM_END)
-    {
-        lzma_end(&strm);
-        throw Error("Decompression failed", "error-ende-decompress-end");
-    }
-
-    lzma_end(&strm);
     outputFile.close();
 
     return true;

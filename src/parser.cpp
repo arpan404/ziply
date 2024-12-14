@@ -18,14 +18,14 @@ void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileN
         {
             if (command == "create")
             {
-                throw Error("Invalid argument set to create a zipled file.\n\nExample of a valid command:\nziply create -f example.png -o zipled -r 1080p -p ziplySecret2 -m gpu -c 8\n\nFor detailed information on the available options, try running 'ziply --help'.",
-                                "par-ex2");
+                throw Error("Invalid argument set to create a zipled file.\n\nExample of a valid command:\nziply create -f example.png -o zipled -r 1080p -p ziplySecret2 -m cpu-gpu -c 8\n\nFor detailed information on the available options, try running 'ziply --help'.",
+                            "par-ex2");
             }
 
             else if (command == "restore")
             {
-                throw Error("Invalid argument set to restore data from zipled file.\n\nExample of a valid command:\nziply restore -f example.mp4 -o restored -p ziplySecret2 -m gpu\n\nFor detailed information on the available options, try running 'ziply --help'.",
-                                "par-ex3");
+                throw Error("Invalid argument set to restore data from zipled file.\n\nExample of a valid command:\nziply restore -f example.mp4 -o restored -p ziplySecret2 -m cpu-gpu\n\nFor detailed information on the available options, try running 'ziply --help'.",
+                            "par-ex3");
             }
             else
             {
@@ -108,11 +108,11 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                             }
                             if (params[i] == "-m")
                             {
-                                if (params[i + 1] != "cpu-single" && params[i + 1] != "cpu-multi" && params[i + 1] != "gpu" && params[i + 1] != "gpu-cpu")
+                                if (params[i + 1] != "only-cpu" && params[i + 1] != "cpu-gpu")
                                 {
                                     displayEnteredArguments(this);
                                     markErrorPart(i, this);
-                                    throw Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey2");
+                                    throw Error("Expected value: 'only-cpu' or 'cpu-gpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ey2");
                                 }
                                 processingMode = params[i + 1];
                             }
@@ -189,11 +189,11 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                             }
                             if (params[i] == "-m")
                             {
-                                if (params[i + 1] != "cpu-single" && params[i + 1] != "cpu-multi" && params[i + 1] != "gpu" && params[i + 1] != "gpu-cpu")
+                                if (params[i + 1] != "only-cpu" && params[i + 1] != "cpu-gpu")
                                 {
                                     displayEnteredArguments(this);
                                     markErrorPart(i + 1, this);
-                                    throw Error("Expected value: 'cpu-single' or 'cpu-multi' or 'gpu' or 'gpu-cpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez2");
+                                    throw Error("Expected value: 'only-cpu' or 'cpu-gpu' but got '" + params[i] + "'.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez2");
                                 }
                                 processingMode = params[i + 1];
                             }
@@ -299,17 +299,15 @@ void Parser::displayHelpTexts()
     std::cout << "  -r  <resolution>  Output video resolution. Options: 360p, 480p, 720p, 1080p [default], 1440p, 4k.\n";
     std::cout << "  -p  <secret_key>  Secret key for encryption. [default: 'ziplySecret']\n";
     std::cout << "  -m  <mode>        Processing mode. Options:\n"
-              << "                     - 'cpu-single': Single CPU core.\n"
-              << "                     - 'cpu-multi': All CPU cores.\n"
-              << "                     - 'gpu': Use GPU with CPU fallback. [default]\n"
-              << "                     - 'gpu-cpu': Use GPU and all CPU cores.\n";
+              << "                     - 'only-cpu': Single CPU core.\n"
+              << "                     - 'cpu-gpu': Use GPU with CPU fallback. [default]\n";
     std::cout << "  -c  <ratio>       Compression prevention (pixel-to-bit ratio). Options: 1[default], 2, 4, 8, 16.\n"
               << "                    Higher values increase the file size, suitable for compression-based platforms.\n";
 
     std::cout << "\nExamples:\n";
     std::cout << "  ziply create -f example.zip\n"
               << "    Converts 'example.zip' into 'example.mp4' with default settings.\n";
-    std::cout << "  ziply create -f example.png -o zipled -r 1080p -p mySecret -m gpu -c 8\n"
+    std::cout << "  ziply create -f example.png -o zipled -r 1080p -p mySecret -m cpu-gpu -c 8\n"
               << "    Converts 'example.png' into 'zipled.mp4' at 1080p resolution, encrypted with 'mySecret', using GPU, with a pixel-to-bit ratio of 8.\n";
 
     std::cout << "\n** Restoring Original Data **\n";
@@ -322,15 +320,13 @@ void Parser::displayHelpTexts()
     std::cout << "  -o  <output_path> Path or name for the restored file. [default: current directory]\n";
     std::cout << "  -p  <secret_key>  Secret key for decryption.[default: 'ziplySecret']\n";
     std::cout << "  -m  <mode>        Processing mode. Options:\n"
-              << "                     - 'cpu-single': Single CPU core.\n"
-              << "                     - 'cpu-multi': All CPU cores.\n"
-              << "                     - 'gpu': Use GPU with CPU fallback. [default]\n"
-              << "                     - 'gpu-cpu': Use GPU and all CPU cores.\n";
+              << "                     - 'only-cpu': Single CPU core.\n"
+              << "                     - 'cpu-gpu': Use GPU with CPU fallback. [default]\n";
 
     std::cout << "\nExamples:\n";
     std::cout << "  ziply restore -f example.mp4\n"
               << "    Restores the original data from 'example.mp4' using default settings.\n";
-    std::cout << "  ziply restore -f example.mp4 -o zipled -p mySecret -m gpu\n"
+    std::cout << "  ziply restore -f example.mp4 -o zipled -p mySecret -m cpu-gpu\n"
               << "    Restores original data from 'example.mp4' to 'zipled', using GPU and the secret key 'mySecret'.\n";
 
     exit(0);
