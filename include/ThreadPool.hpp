@@ -11,7 +11,7 @@
 class ThreadPool {
 private:
   std::vector<std::thread> workers;
-  std::queue<std::function<void()>> tasks;
+  std::queue<std::function<std::future<void>()>> tasks;
   std::mutex queueMutex;
   std::condition_variable condition;
   bool stop = false;
@@ -19,7 +19,7 @@ private:
 public:
   explicit ThreadPool(size_t threads);
   template <class F> void enqueue(F &&task);
-  ~ThreadPool();
+  void wait();
 };
 
 template <class F> void ThreadPool::enqueue(F &&task) {

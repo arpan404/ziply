@@ -32,3 +32,30 @@ formatting:
 find . -name '*.cpp' -o -name '*.hpp' -o -name '*.h' | xargs clang-format -i
 ```
 
+| Command Options                                                   | Description                                                                                                                                                    |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Creating a Ziply Video**                                        |                                                                                                                                                                |
+| Command:                                                          | `ziply create [options]`                                                                                                                                       |
+| **Mandatory Option:**                                             |                                                                                                                                                                |
+| `-f <file_path>`                                                  | Path or name of the file to convert.                                                                                                                           |
+| **Optional Options:**                                             |                                                                                                                                                                |
+| `-o <output_path>`                                                | Path or name for the output file. (File extension is ignored if provided.)                                                                                     |
+| `-r <resolution>`                                                 | Output video resolution. Options: 360p, 480p, 720p, 1080p [default], 1440p, 4k.                                                                                |
+| `-p <secret_key>`                                                 | Secret key for encryption. [default: 'ziplySecret']                                                                                                            |
+| `-c <ratio>`                                                      | Compression prevention (pixel-to-bit ratio). Options: 1[default], 2, 4, 8, 16. Higher values increase the file size, suitable for compression-based platforms. |
+| **Examples:**                                                     |                                                                                                                                                                |
+| `ziply create -f example.zip`                                     | Converts 'example.zip' into 'example.mp4' with default settings.                                                                                               |
+| `ziply create -f example.png -o zipled -r 1080p -p mySecret -c 8` | Converts 'example.png' into 'zipled.mp4' at 1080p resolution, encrypted with 'mySecret', with a pixel-to-bit ratio of 8.                                       |
+| **Restoring Original Data**                                       |                                                                                                                                                                |
+| Command:                                                          | `ziply restore [options]`                                                                                                                                      |
+| **Mandatory Option:**                                             |                                                                                                                                                                |
+| `-f <file_path>`                                                  | Path or name of the video file to restore.                                                                                                                     |
+| **Optional Options:**                                             |                                                                                                                                                                |
+| `-o <output_path>`                                                | Path or name for the restored file. [default: current directory]                                                                                               |
+| `-p <secret_key>`                                                 | Secret key for decryption. [default: 'ziplySecret']                                                                                                            |
+| **Examples:**                                                     |                                                                                                                                                                |
+| `ziply restore -f example.mp4`                                    | Restores the original data from 'example.mp4' using default settings.                                                                                          |
+| `ziply restore -f example.mp4 -o zipled -p mySecret`              | Restores original data from 'example.mp4' to 'zipled', using the secret key 'mySecret'.                                                                        |
+
+Requirements:
+ffmpeg

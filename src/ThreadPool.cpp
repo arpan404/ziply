@@ -4,7 +4,7 @@ ThreadPool::ThreadPool(size_t threads) {
   for (size_t i = 0; i < threads; ++i) {
     workers.emplace_back([this]() {
       while (true) {
-        std::function<void()> task;
+        std::function<std::future<void>()> task;
         {
           std::unique_lock<std::mutex> lock(queueMutex);
           condition.wait(lock, [this] { return stop || !tasks.empty(); });
@@ -20,7 +20,7 @@ ThreadPool::ThreadPool(size_t threads) {
   }
 }
 
-ThreadPool::~ThreadPool() {
+void ThreadPool::wait() {
   {
     std::unique_lock<std::mutex> lock(queueMutex);
     stop = true;

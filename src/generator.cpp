@@ -6,9 +6,11 @@
 #include "threadpool.hpp"
 #include <bitset>
 #include <chrono>
+#include <cstdlib>
 #include <fstream>
 #include <future>
 #include <iostream>
+#include <mutex>
 #include <vector>
 
 Generator::Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password,
@@ -47,21 +49,31 @@ void Generator::generate() {
   if (!fs::create_directories(outputDir)) {
     throw Error("Could not create the output directory", "gen-dir-create");
   }
+
   while (file) {
     file.read(buffer.data(), buffer.size());
     std::streamsize bytes_read = file.gcount();
     if (bytes_read > 0) {
       std::string frameName = outputDir / (std::string("frame_") + std::to_string(currentFrame++) + ".png");
       pool.enqueue([this, buffer = std::vector<char>(buffer), bytes_read, frameName]() {
-        convertToFrames(buffer, bytes_read, frameName);
+        return convertToFrames(buffer, bytes_read, frameName);
       });
     }
   }
+  pool.wait();
+
   fs::remove(outputFilePath);
+
+  const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " + outputDir.string() +
+                              "/frame_%d.png -c:v libx264 -r 60 -pix_fmt yuv420p " +
+                              outputFilePath.replace_extension(".mp4").string();
+
+  std::cout << command << std::endl;
+  std::system(command.c_str());
 }
 
-void Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
-                                const std::string frameName) {
+std::future<void> Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
+                                             const std::string frameName) {
   std::unique_ptr<unsigned char[]> image(new unsigned char[this->frameWidth * this->frameHeight * 3]);
   size_t currentPixelIndex = 0;
   size_t totalPixelsToWrite = bytes_read * 8;
@@ -87,9 +99,11 @@ void Generator::convertToFrames(const std::vector<char> buffer, std::streamsize 
     image[currentPixelIndex++] = 0;
   }
 
-  auto future = std::async(std::launch::async, [frameName, img = std::move(image), this]() {
+  std::future<void> future = std::async(std::launch::async, [frameName, img = std::move(image), this]() {
     stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, img.get(), this->frameWidth * 3);
+    std::cout << "Frame written: " << frameName << std::endl;
   });
+  return future;
 }
 
 void Generator::restore() {
