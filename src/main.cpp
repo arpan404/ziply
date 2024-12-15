@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     bool isRestoring;
 
     Parser parser;
-    parser.parse(argc, argv, isRestoring, fileName, outputFileName, password, frameHeight, frameWidth, bitPixelRatio);
+    parser.parse(argc, argv, isRestoring, fileName, outputFileName, password, frameHeight, frameWidth);
 
     Ziply ziply(fileName, outputFileName, password, frameWidth, frameHeight, bitPixelRatio);
     if (isRestoring)

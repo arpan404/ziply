@@ -1,7 +1,7 @@
 #include "parser.hpp"
 
 void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileName, std::string &outputFileName,
-                   std::string &password, int &frameHeight, int &frameWidth, int &bitPixelRatio) {
+                   std::string &password, int &frameHeight, int &frameWidth) { // Removed bitPixelRatio
   if (argc < 2) {
     throw Error("No arguments passed.\nIf you need help running ziply, run 'ziply --help'", "par-ex1");
   }
@@ -13,7 +13,7 @@ void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileN
     } else {
       if (command == "create") {
         throw Error("Invalid argument set to create a zipled file.\n\nExample of a valid command:\nziply "
-                    "create -f example.png -o zipled -r 1080p -p ziplySecret2 -c 8\n\nFor detailed information "
+                    "create -f example.png -o zipled -r 1080p -p ziplySecret2\n\nFor detailed information "
                     "on the available options, try running 'ziply --help'.",
                     "par-ex2");
       }
@@ -32,11 +32,12 @@ void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileN
   }
 
   for (int i = 0; i < argc; i++) { this->params.push_back(std::string(argv[i])); }
-  this->validateArguments(isRestoring, fileName, outputFileName, password, frameHeight, frameWidth, bitPixelRatio);
+  this->validateArguments(isRestoring, fileName, outputFileName, password, frameHeight,
+                          frameWidth); // Removed bitPixelRatio
 }
 
 void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName,
-                               std::string &password, int &frameHeight, int &frameWidth, int &bitPixelRatio) {
+                               std::string &password, int &frameHeight, int &frameWidth) { // Removed bitPixelRatio
   if (params[1] != "create" && params[1] != "restore") {
     displayEnteredArguments(this);
     markErrorPart(1, this);
@@ -49,12 +50,12 @@ void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::st
     } else {
       isRestoring = true;
     }
-    prepareArguments(isRestoring, fileName, outputFileName, password, frameHeight, frameWidth, bitPixelRatio);
+    prepareArguments(isRestoring, fileName, outputFileName, password, frameHeight, frameWidth); // Removed bitPixelRatio
   }
 }
 
 void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName,
-                              std::string &password, int &frameHeight, int &frameWidth, int &bitPixelRatio) {
+                              std::string &password, int &frameHeight, int &frameWidth) { // Removed bitPixelRatio
   int argumentsListLength = params.size();
   bool isInputFileProvided = false;
   bool isResolutionProvided = false;
@@ -118,7 +119,7 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                   "par-ey6");
     }
   } else {
-    std::unordered_set<std::string> availableArguments = {"-f", "-o", "-p", "-r", "-c"};
+    std::unordered_set<std::string> availableArguments = {"-f", "-o", "-p", "-r"}; // Removed "-c"
     int i = 2;
     while (i < argumentsListLength) {
       if (params[i][0] == '-') {
@@ -189,18 +190,6 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                 }
               }
 
-              if (params[i] == "-c") {
-                try {
-                  int pixelToBitRatio = std::stoi(params[i + 1]);
-                  std::cout << pixelToBitRatio;
-                } catch (std::invalid_argument e) {
-                  displayEnteredArguments(this);
-                  markErrorPart(i + 1, this);
-                  throw Error("Invalid pixel to bit ratio provided, expected a number.\n\nFor "
-                              "detailed information, try running 'ziply --help'.",
-                              "par-ez4");
-                }
-              }
               i += 2;
             }
           } else {
@@ -231,11 +220,6 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                     "options, try running 'ziply --help'.",
                     "par-ez6");
       }
-      if (frameWidth % bitPixelRatio != 0) {
-        throw Error("Frame width must be divisible by the pixel to bit ratio.\n\nFor detailed information on "
-                    "the available options, try running 'ziply --help'.",
-                    "par-ez7");
-      }
     }
   }
 }
@@ -253,15 +237,13 @@ void Parser::displayHelpTexts() {
   std::cout << "  -o  <output_path> Path or name for the output file. (File extension is ignored if provided.)\n";
   std::cout << "  -r  <resolution>  Output video resolution. Options: 360p, 480p, 720p, 1080p [default], 1440p, 4k.\n";
   std::cout << "  -p  <secret_key>  Secret key for encryption. [default: 'ziplySecret']\n";
-  std::cout << "  -c  <ratio>       Compression prevention (pixel-to-bit ratio). Options: 1[default], 2, 4, 8, 16.\n"
-            << "                    Higher values increase the file size, suitable for compression-based platforms.\n";
+  // Removed compression ratio help text
 
   std::cout << "\nExamples:\n";
   std::cout << "  ziply create -f example.zip\n"
             << "    Converts 'example.zip' into 'example.mp4' with default settings.\n";
-  std::cout << "  ziply create -f example.png -o zipled -r 1080p -p mySecret -c 8\n"
-            << "    Converts 'example.png' into 'zipled.mp4' at 1080p resolution, encrypted with 'mySecret', with a "
-               "pixel-to-bit ratio of 8.\n";
+  std::cout << "  ziply create -f example.png -o zipled -r 1080p -p mySecret\n"
+            << "    Converts 'example.png' into 'zipled.mp4' at 1080p resolution, encrypted with 'mySecret'.\n";
 
   std::cout << "\n** Restoring Original Data **\n";
   std::cout << "Command: ziply restore [options]\n";
