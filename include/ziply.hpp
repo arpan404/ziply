@@ -3,17 +3,17 @@
 
 #include <string>
 
-class Ziply
-{
-private:
+class Ziply {
+  private:
     std::string fileName;
     std::string outputFileName;
     int frameHeight, frameWidth;
     float bitPixelRatio;
     std::string password;
 
-public:
-    Ziply(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, int bitPixelRatio);
+  public:
+    Ziply(const std::string &fileName, const std::string &outputFileName, const std::string &password,
+          const int frameWidth, const int frameHeight, int bitPixelRatio);
 
     void convert();
     void restore();

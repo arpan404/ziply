@@ -1,23 +1,22 @@
 #ifndef FILE_HPP
 #define FILE_HPP
 
-#include <string>
-#include <filesystem>
-#include <fstream>
-#include <bitset>
-#include <thread>
 #include "error.hpp"
 #include "stb_image_write.h"
+#include <bitset>
+#include <filesystem>
+#include <fstream>
+#include <string>
+#include <thread>
 
 namespace fs = std::filesystem;
 
-class File
-{
-public:
+class File {
+  public:
     File(std::string fileName, int frameWidth, int frameHeight);
     void convertToFrames();
 
-private:
+  private:
     std::string fileName;
     std::string filePath;
     int frameWidth;

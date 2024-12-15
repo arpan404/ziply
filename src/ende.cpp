@@ -1,15 +1,11 @@
 #include "ende.hpp"
 
-Ende::EncryptionParams Ende::deriveKey(const std::string &password, const std::array<uint8_t, SALT_SIZE> &salt)
-{
+Ende::EncryptionParams Ende::deriveKey(const std::string &password, const std::array<uint8_t, SALT_SIZE> &salt) {
     Ende::EncryptionParams params;
     std::array<uint8_t, 32> keyAndIv;
 
-    if (!PKCS5_PBKDF2_HMAC(password.c_str(), password.size(),
-                           salt.data(), salt.size(),
-                           10000, EVP_sha256(),
-                           keyAndIv.size(), keyAndIv.data()))
-    {
+    if (!PKCS5_PBKDF2_HMAC(password.c_str(), password.size(), salt.data(), salt.size(), 10000, EVP_sha256(),
+                           keyAndIv.size(), keyAndIv.data())) {
         throw Error("Failed to derive key and IV", "error-ende-key");
     }
 
@@ -18,8 +14,7 @@ Ende::EncryptionParams Ende::deriveKey(const std::string &password, const std::a
     return params;
 }
 
-std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const EncryptionParams &params)
-{
+std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const EncryptionParams &params) {
     std::vector<uint8_t> encryptedData;
     encryptedData.resize(data.size() + EVP_MAX_BLOCK_LENGTH);
 
@@ -27,22 +22,19 @@ std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const Encry
     if (!ctx)
         throw Error("Failed to create encryption context", "error-ende-enc1");
 
-    if (!EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, params.key.data(), params.iv.data()))
-    {
+    if (!EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, params.key.data(), params.iv.data())) {
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed to initialize encryption", "error-ende-enc2");
     }
 
     int len = 0;
-    if (!EVP_EncryptUpdate(ctx, encryptedData.data(), &len, data.data(), data.size()))
-    {
+    if (!EVP_EncryptUpdate(ctx, encryptedData.data(), &len, data.data(), data.size())) {
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed during encryption", "error-ende-enc3");
     }
 
     int finalLen = 0;
-    if (!EVP_EncryptFinal_ex(ctx, encryptedData.data() + len, &finalLen))
-    {
+    if (!EVP_EncryptFinal_ex(ctx, encryptedData.data() + len, &finalLen)) {
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed to finalize encryption", "error-ende-enc4");
     }
@@ -52,30 +44,26 @@ std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const Encry
     return encryptedData;
 }
 
-std::vector<uint8_t> Ende::decrypt(const std::vector<uint8_t> &data, const EncryptionParams &params)
-{
+std::vector<uint8_t> Ende::decrypt(const std::vector<uint8_t> &data, const EncryptionParams &params) {
     std::vector<uint8_t> decryptedData(data.size());
 
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx)
         throw Error("Failed to create decryption context", "error-ende-dec1");
 
-    if (!EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, params.key.data(), params.iv.data()))
-    {
+    if (!EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, params.key.data(), params.iv.data())) {
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed to initialize decryption", "error-ende-dec2");
     }
 
     int len = 0;
-    if (!EVP_DecryptUpdate(ctx, decryptedData.data(), &len, data.data(), data.size()))
-    {
+    if (!EVP_DecryptUpdate(ctx, decryptedData.data(), &len, data.data(), data.size())) {
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed during decryption", "error-ende-dec3");
     }
 
     int finalLen = 0;
-    if (!EVP_DecryptFinal_ex(ctx, decryptedData.data() + len, &finalLen))
-    {
+    if (!EVP_DecryptFinal_ex(ctx, decryptedData.data() + len, &finalLen)) {
         EVP_CIPHER_CTX_free(ctx);
         throw Error("Failed to finalize decryption", "error-ende-dec4");
     }
@@ -86,8 +74,7 @@ std::vector<uint8_t> Ende::decrypt(const std::vector<uint8_t> &data, const Encry
 }
 
 bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::string &outputFilePath,
-                              const std::string &password, uint32_t compressionLevel)
-{
+                              const std::string &password, uint32_t compressionLevel) {
 
     std::ifstream inputFile(inputFilePath, std::ios::binary | std::ios::ate);
     if (!inputFile)
@@ -112,8 +99,7 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
     strm.avail_out = compressedData.size();
 
     ret = lzma_code(&strm, LZMA_FINISH);
-    if (ret != LZMA_STREAM_END)
-    {
+    if (ret != LZMA_STREAM_END) {
         lzma_end(&strm);
         throw Error("Compression failed", "error-ende-compress-end");
     }
@@ -122,8 +108,7 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
     lzma_end(&strm);
 
     std::array<uint8_t, SALT_SIZE> salt;
-    if (!RAND_bytes(salt.data(), salt.size()))
-    {
+    if (!RAND_bytes(salt.data(), salt.size())) {
         throw Error("Failed to generate salt", "error-ende-salt");
     }
 
@@ -142,8 +127,7 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
 }
 
 bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::string &outputFilePath,
-                                const std::string &password)
-{
+                                const std::string &password) {
 
     std::ifstream inputFile(inputFilePath, std::ios::binary | std::ios::ate);
     if (!inputFile)
@@ -152,8 +136,7 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
     size_t fileSize = static_cast<size_t>(inputFile.tellg());
     inputFile.seekg(0);
 
-    if (fileSize < SALT_SIZE)
-    {
+    if (fileSize < SALT_SIZE) {
         throw Error("Invalid file format", "error-ende-file-size");
     }
 
@@ -182,11 +165,9 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
     if (!outputFile)
         throw Error("Failed to open output file", "error-ende-output");
 
-    do
-    {
+    do {
         ret = lzma_code(&strm, LZMA_FINISH);
-        if (strm.avail_out == 0 || ret == LZMA_STREAM_END)
-        {
+        if (strm.avail_out == 0 || ret == LZMA_STREAM_END) {
             size_t written = outputData.size() - strm.avail_out;
             outputFile.write(reinterpret_cast<char *>(outputData.data()), written);
             strm.next_out = outputData.data();
@@ -194,8 +175,7 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
         }
     } while (ret == LZMA_OK);
 
-    if (ret != LZMA_STREAM_END)
-    {
+    if (ret != LZMA_STREAM_END) {
         lzma_end(&strm);
         throw Error("Decompression failed", "error-ende-decompress-end");
     }

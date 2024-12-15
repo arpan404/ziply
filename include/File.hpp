@@ -4,12 +4,11 @@
 #include <filesystem>
 #include <vector>
 namespace fs = std::filesystem;
-namespace file
-{
-    bool pathExists(const std::string &path);
-    fs::path getAbsolutePath(const std::string &path);
+namespace file {
+bool pathExists(const std::string &path);
+fs::path getAbsolutePath(const std::string &path);
 
-    std::vector<fs::path> getConvertFilePath(const std::string &inputFileName, const std::string &outputFileName);
-}
+std::vector<fs::path> getConvertFilePath(const std::string &inputFileName, const std::string &outputFileName);
+} // namespace file
 
 #endif
