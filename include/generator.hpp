@@ -16,11 +16,11 @@ private:
     std::string password;
     int frameWidth;
     int frameHeight;
-    float bitPixelRatio;
+    int bitPixelRatio;
     void convertToFrames(std::vector<char> &buffer, std::streamsize &bytes_read, std::string &frameName);
 
 public:
-    Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, const float bitPixelRatio);
+    Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, const int bitPixelRatio);
     void generate();
     void restore();
 };

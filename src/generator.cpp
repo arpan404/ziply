@@ -1,7 +1,10 @@
 #include "generator.hpp"
 #include "ende.hpp"
+#include "file.hpp"
+#include "threadpool.hpp"
+#include "stb_image_write.h"
 
-Generator::Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, const float bitPixelRatio)
+Generator::Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, const int bitPixelRatio)
 {
     this->inputFileName = fileName;
     this->outputFileName = outputFileName;
@@ -17,26 +20,27 @@ void Generator::generate()
     fs::path outputFilePath = filePaths[1].replace_extension(".ziply");
     Ende::compressAndEncrypt(filePaths[0], outputFilePath, this->password, 9);
 
-    // Calculate chunk size based on frame dimensions and bit-pixel ratio
-    size_t chunkSize = static_cast<size_t>((this->frameWidth * this->frameHeight) / this->bitPixelRatio);
+    size_t chunk_size = ((this->frameHeight * this->frameWidth) / 8);
+    std::ifstream file(outputFilePath, std::ios::binary);
+    ThreadPool pool(std::thread::hardware_concurrency());
 
-    try
+    if (!file)
     {
-        // Read file in chunks asynchronously
-        auto futures = readFileInChunks(outputFilePath, chunkSize);
-
-        // Process the chunks as they complete
-        for (auto &future : futures)
-        {
-            std::vector<char> chunk = future.get(); // This will wait for the chunk to be ready
-            std::cout << "Processed chunk of size: " << chunk.size() << std::endl;
-            // Process your chunk here
-        }
+        throw Error("Could not open the file", "efx1");
     }
-    catch (const std::exception &e)
+
+    std::vector<char> buffer(chunk_size);
+    int currentFrame = 0;
+    while (file)
     {
-        std::cerr << "Error processing file: " << e.what() << std::endl;
-        throw;
+        file.read(buffer.data(), buffer.size());
+        std::streamsize bytes_read = file.gcount();
+        if (bytes_read > 0)
+        {
+            std::string frameName = std::to_string(currentFrame++) + ".png";
+            pool.enqueue([this, buffer=buffer, bytes_read, frameName]()
+                         { convertToFrames(buffer, bytes_read, frameName); });
+        }
     }
 }
 
@@ -45,7 +49,7 @@ void Generator::convertToFrames(std::vector<char> &buffer, std::streamsize &byte
     unsigned char *image = new unsigned char[this->frameWidth * this->frameHeight * 3];
     size_t currentXaxis = 0, currentYaxis = 0, currentPixelIndex = 0;
     size_t totalPixelsToWrite = bytes_read * 8;
-    std::cout << totalPixelsToWrite << std::endl;
+
     for (size_t i = 0; i < bytes_read; ++i)
     {
         std::bitset<8> currentByte(buffer[i]);
@@ -71,10 +75,11 @@ void Generator::convertToFrames(std::vector<char> &buffer, std::streamsize &byte
             x = 0;
         }
     }
-
-    stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3);
-
-    delete[] image;
+    std::async(std::launch::async, [this, frameName, image]()
+               {
+        stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3);
+        delete[] image; });
+    
 }
 
 void Generator::restore()

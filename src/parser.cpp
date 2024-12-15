@@ -1,6 +1,6 @@
 #include "parser.hpp"
 
-void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, int &frameHeight, int &frameWidth, float &bitPixelRatio)
+void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, int &frameHeight, int &frameWidth, int &bitPixelRatio)
 {
     if (argc < 2)
     {
@@ -41,7 +41,7 @@ void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileN
     this->validateArguments(isRestoring, fileName, outputFileName, password, frameHeight, frameWidth, bitPixelRatio);
 }
 
-void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, int &frameHeight, int &frameWidth, float &bitPixelRatio)
+void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, int &frameHeight, int &frameWidth, int &bitPixelRatio)
 {
     if (params[1] != "create" && params[1] != "restore")
     {
@@ -63,7 +63,7 @@ void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::st
     }
 }
 
-void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, int &frameHeight, int &frameWidth, float &bitPixelRatio)
+void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName, std::string &password, int &frameHeight, int &frameWidth, int &bitPixelRatio)
 {
     int argumentsListLength = params.size();
     bool isInputFileProvided = false;

@@ -13,7 +13,7 @@ private:
     std::string password;
 
 public:
-    Ziply(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, float bitPixelRatio);
+    Ziply(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, int bitPixelRatio);
 
     void convert();
     void restore();

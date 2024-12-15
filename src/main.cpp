@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
         std::string outputFileName;
         std::string password = "ziplySecret";
         int frameHeight, frameWidth;
-        float bitPixelRatio = 1;
+        int bitPixelRatio = 1;
         bool isRestoring;
 
         Parser parser;
