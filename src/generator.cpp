@@ -1,12 +1,15 @@
 #include "generator.hpp"
 #include "ende.hpp"
+#include "error.hpp"
 #include "file.hpp"
 #include "stb_image_write.h"
 #include "threadpool.hpp"
 #include <bitset>
+#include <chrono>
 #include <fstream>
 #include <future>
 #include <iostream>
+#include <vector>
 
 Generator::Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password,
                      const int frameWidth, const int frameHeight, const int bitPixelRatio) {
@@ -31,23 +34,30 @@ void Generator::generate() {
   ThreadPool pool(std::thread::hardware_concurrency());
   std::cout << "Chunk size: " << chunk_size << std::endl;
   if (!file) {
-    throw std::runtime_error("Could not open the file");
+    throw Error("Could not open the file", "gen-file-open");
   }
 
   std::vector<char> buffer(chunk_size);
-  std::cout << "Buffer size: " << buffer.size() << std::endl;
   int currentFrame = 0;
-
+  fs::path outputDir =
+      outputFilePath.parent_path() / std::string(outputFilePath.stem().string() + "_frames" +
+                                                 std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                                                    std::chrono::system_clock::now().time_since_epoch())
+                                                                    .count()));
+  if (!fs::create_directories(outputDir)) {
+    throw Error("Could not create the output directory", "gen-dir-create");
+  }
   while (file) {
     file.read(buffer.data(), buffer.size());
     std::streamsize bytes_read = file.gcount();
     if (bytes_read > 0) {
-      std::string frameName = std::to_string(currentFrame++) + ".png";
+      std::string frameName = outputDir / (std::string("frame_") + std::to_string(currentFrame++) + ".png");
       pool.enqueue([this, buffer = std::vector<char>(buffer), bytes_read, frameName]() {
         convertToFrames(buffer, bytes_read, frameName);
       });
     }
   }
+  fs::remove(outputFilePath);
 }
 
 void Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
@@ -80,8 +90,6 @@ void Generator::convertToFrames(const std::vector<char> buffer, std::streamsize 
   auto future = std::async(std::launch::async, [frameName, img = std::move(image), this]() {
     stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, img.get(), this->frameWidth * 3);
   });
-
-  future.get();
 }
 
 void Generator::restore() {
