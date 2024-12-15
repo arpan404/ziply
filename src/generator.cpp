@@ -27,14 +27,10 @@ void Generator::generate() {
   std::vector<fs::path> filePaths = file::getConvertFilePath(this->inputFileName, this->outputFileName);
   fs::path outputFilePath = filePaths[1].replace_extension(".ziply");
   Ende::compressAndEncrypt(filePaths[0], outputFilePath, this->password, 9);
-  std::cout << "Compression and encryption completed successfully" << std::endl;
-
-  std::cout << "Output file path: " << this->frameHeight << " " << this->frameWidth << std::endl;
 
   size_t chunk_size = ((this->frameHeight * this->frameWidth) / 8);
   std::ifstream file(outputFilePath, std::ios::binary);
   ThreadPool pool(std::thread::hardware_concurrency());
-  std::cout << "Chunk size: " << chunk_size << std::endl;
   if (!file) {
     throw Error("Could not open the file", "gen-file-open");
   }
@@ -68,11 +64,9 @@ void Generator::generate() {
                               "/frame_%d.png -c:v libx264 -r 60 -pix_fmt yuv420p " +
                               outputFilePath.replace_extension(".mp4").string();
 
-  std::cout << command << std::endl;
-
   int result = std::system(command.c_str());
   if (result != 0) {
-    std::cerr << "Error occurred while generating the video." << std::endl;
+    throw Error("Error occurred while generating the video", "gen-video-gen");
   }
 
   fs::remove_all(outputDir);
