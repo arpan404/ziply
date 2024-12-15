@@ -11,7 +11,6 @@ ThreadPool::ThreadPool(size_t threads) {
           if (stop && tasks.empty()) {
             return;
           }
-
           task = std::move(tasks.front());
           tasks.pop();
         }

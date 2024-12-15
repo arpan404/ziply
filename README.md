@@ -25,3 +25,10 @@ make
 ## Usage
 
 To use Ziply, run the executable with the desired parameters. For example, to create a zipled file:
+
+formatting:
+
+```bash
+find . -name '*.cpp' -o -name '*.hpp' -o -name '*.h' | xargs clang-format -i
+```
+

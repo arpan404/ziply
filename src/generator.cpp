@@ -37,36 +37,38 @@ void Generator::generate() {
   std::vector<char> buffer(chunk_size);
   std::cout << "Buffer size: " << buffer.size() << std::endl;
   int currentFrame = 0;
-  std::vector<std::future<void>> futures;
 
   while (file) {
     file.read(buffer.data(), buffer.size());
     std::streamsize bytes_read = file.gcount();
     if (bytes_read > 0) {
       std::string frameName = std::to_string(currentFrame++) + ".png";
-      futures.push_back(pool.enqueue([this, buffer = std::vector<char>(buffer), bytes_read, frameName]() {
+      pool.enqueue([this, buffer = std::vector<char>(buffer), bytes_read, frameName]() {
         convertToFrames(buffer, bytes_read, frameName);
-      }));
+      });
     }
   }
-
-  // for (auto &future : futures)
-  // {
-  //     future.get();
-  // }
-
-  // std::cout << "All frames converted successfully.\n";
 }
 
-std::future<void> Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
-                                             const std::string frameName) {
+void Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
+                                const std::string frameName) {
   std::unique_ptr<unsigned char[]> image(new unsigned char[this->frameWidth * this->frameHeight * 3]);
   size_t currentPixelIndex = 0;
   size_t totalPixelsToWrite = bytes_read * 8;
 
   for (size_t i = 0; i < bytes_read; ++i) {
     std::bitset<8> currentByte(buffer[i]);
-    for (int j = 0; j < 8; ++j) { image[currentPixelIndex++] = currentByte[j] ? 255 : 0; }
+    for (int j = 0; j < 8; ++j) {
+      if (currentByte[j]) {
+        image[currentPixelIndex++] = 255;
+        image[currentPixelIndex++] = 255;
+        image[currentPixelIndex++] = 255;
+      } else {
+        image[currentPixelIndex++] = 0;
+        image[currentPixelIndex++] = 0;
+        image[currentPixelIndex++] = 0;
+      }
+    }
   }
 
   while (currentPixelIndex < this->frameWidth * this->frameHeight * 3) {
@@ -78,7 +80,8 @@ std::future<void> Generator::convertToFrames(const std::vector<char> buffer, std
   auto future = std::async(std::launch::async, [frameName, img = std::move(image), this]() {
     stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, img.get(), this->frameWidth * 3);
   });
-  return future;
+
+  future.get();
 }
 
 void Generator::restore() {

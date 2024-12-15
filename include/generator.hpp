@@ -19,8 +19,7 @@ private:
   int frameWidth;
   int frameHeight;
   int bitPixelRatio;
-  std::future<void> convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
-                                    const std::string frameName);
+  void convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read, const std::string frameName);
 };
 
 #endif
