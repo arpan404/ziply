@@ -11,79 +11,70 @@ Generator::Generator(const std::string &fileName, const std::string &outputFileN
     this->bitPixelRatio = bitPixelRatio;
 }
 
-std::vector<std::future<std::vector<char>>> Generator::readFileInChunks(const fs::path& filePath, size_t chunkSize) 
-{
-    std::vector<std::future<std::vector<char>>> futures;
-    
-    // Open file and get its size
-    std::shared_ptr<std::ifstream> file = std::make_shared<std::ifstream>(filePath, std::ios::binary);
-    if (!file->is_open()) {
-        throw std::runtime_error("Could not open file: " + filePath.string());
-    }
-
-    file->seekg(0, std::ios::end);
-    size_t fileSize = file->tellg();
-    file->seekg(0, std::ios::beg);
-
-    // Calculate number of chunks
-    size_t numChunks = (fileSize + chunkSize - 1) / chunkSize;
-
-    // Create async tasks for each chunk
-    for (size_t i = 0; i < numChunks; ++i) {
-        size_t offset = i * chunkSize;
-        size_t currentChunkSize = std::min(chunkSize, fileSize - offset);
-
-        // Launch async task
-        futures.push_back(std::async(std::launch::async,
-            [file, offset, currentChunkSize, this]() {
-                return this->readFileChunk(*file, offset, currentChunkSize);
-            }
-        ));
-    }
-
-    return futures;
-}
-
-std::vector<char> Generator::readFileChunk(std::ifstream& file, size_t offset, size_t chunkSize)
-{
-    std::vector<char> buffer(chunkSize);
-    
-    // Set the file position
-    file.seekg(offset);
-    
-    // Read the chunk
-    file.read(buffer.data(), chunkSize);
-    
-    // Resize buffer to actual number of bytes read
-    size_t bytesRead = file.gcount();
-    buffer.resize(bytesRead);
-    
-    return buffer;
-}
-
 void Generator::generate()
 {
     std::vector<fs::path> filePaths = file::getConvertFilePath(this->inputFileName, this->outputFileName);
     fs::path outputFilePath = filePaths[1].replace_extension(".ziply");
     Ende::compressAndEncrypt(filePaths[0], outputFilePath, this->password, 9);
-    
+
     // Calculate chunk size based on frame dimensions and bit-pixel ratio
     size_t chunkSize = static_cast<size_t>((this->frameWidth * this->frameHeight) / this->bitPixelRatio);
-    
-    try {
+
+    try
+    {
         // Read file in chunks asynchronously
         auto futures = readFileInChunks(outputFilePath, chunkSize);
-        
+
         // Process the chunks as they complete
-        for (auto& future : futures) {
-            std::vector<char> chunk = future.get();  // This will wait for the chunk to be ready
+        for (auto &future : futures)
+        {
+            std::vector<char> chunk = future.get(); // This will wait for the chunk to be ready
             std::cout << "Processed chunk of size: " << chunk.size() << std::endl;
             // Process your chunk here
         }
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "Error processing file: " << e.what() << std::endl;
         throw;
     }
+}
+
+void Generator::convertToFrames(std::vector<char> &buffer, std::streamsize &bytes_read, std::string &frameName)
+{
+    unsigned char *image = new unsigned char[this->frameWidth * this->frameHeight * 3];
+    size_t currentXaxis = 0, currentYaxis = 0, currentPixelIndex = 0;
+    size_t totalPixelsToWrite = bytes_read * 8;
+    std::cout << totalPixelsToWrite << std::endl;
+    for (size_t i = 0; i < bytes_read; ++i)
+    {
+        std::bitset<8> currentByte(buffer[i]);
+        for (int j = 0; j < 8; ++j)
+        {
+            image[currentPixelIndex] = currentByte[j];
+            currentPixelIndex++;
+        }
+    }
+
+    if (currentPixelIndex >= totalPixelsToWrite)
+    {
+        int x = currentXaxis;
+        for (int y = currentYaxis; y < this->frameHeight; ++y)
+        {
+            for (; x < this->frameWidth; ++x)
+            {
+                image[(y * this->frameWidth + x) * 3 + 0] = 255; // Red channel
+                image[(y * this->frameWidth + x) * 3 + 1] = 0;   // Green channel
+                image[(y * this->frameWidth + x) * 3 + 2] = 0;   // Blue channel
+            }
+
+            x = 0;
+        }
+    }
+
+    stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3);
+
+    delete[] image;
 }
 
 void Generator::restore()

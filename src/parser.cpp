@@ -258,6 +258,10 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
             {
                 throw Error("Expected an input file, but got none.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
             }
+            if (frameWidth % bitPixelRatio != 0)
+            {
+                throw Error("Frame width must be divisible by the pixel to bit ratio.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez7");
+            }
         }
     }
 }

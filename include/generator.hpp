@@ -2,7 +2,7 @@
 #define GENERATOR_HPP
 
 #include <string>
-#include <future> 
+#include <future>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -17,10 +17,7 @@ private:
     int frameWidth;
     int frameHeight;
     float bitPixelRatio;
-    
-    // Private helper method for reading chunks
-    std::vector<char> readFileChunk(std::ifstream& file, size_t offset, size_t chunkSize);
-    std::vector<std::future<std::vector<char>>> readFileInChunks(const fs::path& filePath, size_t chunkSize);
+    void convertToFrames(std::vector<char> &buffer, std::streamsize &bytes_read, std::string &frameName);
 
 public:
     Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, const float bitPixelRatio);
