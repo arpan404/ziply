@@ -1,7 +1,6 @@
 #include "ziply.hpp"
 #include "generator.hpp"
 
-
 Ziply::Ziply(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, int bitPixelRatio)
     : fileName(fileName), outputFileName(outputFileName), password(password), frameWidth(frameWidth), frameHeight(frameHeight), bitPixelRatio(bitPixelRatio) {}
 

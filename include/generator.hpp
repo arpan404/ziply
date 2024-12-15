@@ -17,7 +17,7 @@ private:
     int frameWidth;
     int frameHeight;
     int bitPixelRatio;
-    void convertToFrames(std::vector<char> &buffer, std::streamsize &bytes_read, std::string &frameName);
+    void convertToFrames(std::vector<char> buffer, std::streamsize bytes_read, std::string frameName);
 
 public:
     Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password, const int frameWidth, const int frameHeight, const int bitPixelRatio);

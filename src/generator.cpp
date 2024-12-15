@@ -19,32 +19,36 @@ void Generator::generate()
     std::vector<fs::path> filePaths = file::getConvertFilePath(this->inputFileName, this->outputFileName);
     fs::path outputFilePath = filePaths[1].replace_extension(".ziply");
     Ende::compressAndEncrypt(filePaths[0], outputFilePath, this->password, 9);
+    std::cout << "Compression and encryption completed successfully" << std::endl;
 
-    size_t chunk_size = ((this->frameHeight * this->frameWidth) / 8);
-    std::ifstream file(outputFilePath, std::ios::binary);
-    ThreadPool pool(std::thread::hardware_concurrency());
+    std::cout << "Output file path: " << this->frameHeight << " " << this->frameWidth << std::endl;
 
-    if (!file)
-    {
-        throw Error("Could not open the file", "efx1");
-    }
+    // chunk_size = ((this->frameHeight * this->frameWidth) / 8);
+    // std::ifstream file(outputFilePath, std::ios::binary);
+    // ThreadPool pool(std::thread::hardware_concurrency());
+    // std::cout << "Chunk size: " << chunk_size << std::endl;
+    // if (!file)
+    // {
+    //     throw Error("Could not open the file", "efx1");
+    // }
 
-    std::vector<char> buffer(chunk_size);
-    int currentFrame = 0;
-    while (file)
-    {
-        file.read(buffer.data(), buffer.size());
-        std::streamsize bytes_read = file.gcount();
-        if (bytes_read > 0)
-        {
-            std::string frameName = std::to_string(currentFrame++) + ".png";
-            pool.enqueue([this, buffer=buffer, bytes_read, frameName]()
-                         { convertToFrames(buffer, bytes_read, frameName); });
-        }
-    }
+    // std::vector<char> buffer(chunk_size);
+    // std::cout << "Buffer size: " << buffer.size() << std::endl;
+    // int currentFrame = 0;
+    // while (file)
+    // {
+    //     file.read(buffer.data(), buffer.size());
+    //     std::streamsize bytes_read = file.gcount();
+    //     if (bytes_read > 0)
+    //     {
+    //         std::string frameName = std::to_string(currentFrame++) + ".png";
+    //         pool.enqueue([this, buffer = std::vector<char>(buffer), bytes_read, frameName]()
+    //                      { convertToFrames(buffer, bytes_read, frameName); });
+    //     }
+    // }
 }
 
-void Generator::convertToFrames(std::vector<char> &buffer, std::streamsize &bytes_read, std::string &frameName)
+void Generator::convertToFrames(std::vector<char> buffer, std::streamsize bytes_read, std::string frameName)
 {
     unsigned char *image = new unsigned char[this->frameWidth * this->frameHeight * 3];
     size_t currentXaxis = 0, currentYaxis = 0, currentPixelIndex = 0;
@@ -75,11 +79,10 @@ void Generator::convertToFrames(std::vector<char> &buffer, std::streamsize &byte
             x = 0;
         }
     }
-    std::async(std::launch::async, [this, frameName, image]()
-               {
-        stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3);
-        delete[] image; });
-    
+    // std::async(std::launch::async, [this, frameName, image]()
+    //            {
+    stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3);
+    // delete[] image; });
 }
 
 void Generator::restore()

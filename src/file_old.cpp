@@ -66,7 +66,7 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
     for (size_t i = 0; i < bytes_read; ++i)
     {
         std::bitset<8> currentByte(buffer[i]);
-        
+
         for (int j = 0; j < 8; ++j)
         {
 
@@ -104,8 +104,10 @@ void File::generateFrames(std::vector<char> buffer, std::streamsize bytes_read, 
         }
     }
 
+    auto future = std::async(std::launch::async, [&]()
+                             {
     stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, image, this->frameWidth * 3);
+    delete[] image; });
 
-    // Clean up
-    delete[] image;
+    // return future;
 }

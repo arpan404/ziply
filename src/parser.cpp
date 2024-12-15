@@ -67,6 +67,7 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
 {
     int argumentsListLength = params.size();
     bool isInputFileProvided = false;
+    bool isResolutionProvided = false;
     if (isRestoring)
     {
         std::unordered_set<std::string> availableArguments = {
@@ -189,36 +190,43 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                                 {
                                     frameWidth = 640;
                                     frameHeight = 360;
+                                    isResolutionProvided = true;
                                 }
                                 else if (res == "480p")
                                 {
                                     frameWidth = 854;
                                     frameHeight = 480;
+                                    isResolutionProvided = true;
                                 }
                                 else if (res == "720p")
                                 {
                                     frameWidth = 1280;
                                     frameHeight = 720;
+                                    isResolutionProvided = true;
                                 }
                                 else if (res == "1080p")
                                 {
                                     frameWidth = 1920;
                                     frameHeight = 1080;
+                                    isResolutionProvided = true;
                                 }
                                 else if (res == "1440p")
                                 {
                                     frameWidth = 2560;
                                     frameHeight = 1440;
+                                    isResolutionProvided = true;
                                 }
                                 else if (res == "4k")
                                 {
                                     frameWidth = 3840;
                                     frameHeight = 2160;
+                                    isResolutionProvided = true;
                                 }
                                 else
                                 {
                                     frameWidth = 1920;
                                     frameHeight = 1080;
+                                    isResolutionProvided = true;
                                 }
                             }
 
@@ -252,6 +260,12 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                     markErrorPart(i, this);
                     throw Error("Invalid argument '" + params[i] + "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.", "par-ez6");
                 }
+            }
+
+            if (!isResolutionProvided)
+            {
+                frameHeight = 1080;
+                frameWidth = 1920;
             }
 
             if (!isInputFileProvided)
