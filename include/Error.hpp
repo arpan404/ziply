@@ -6,13 +6,13 @@
 #include <string>
 
 class Error {
-  public:
-    Error(const std::string &message, const std::string &code) : message(message), code(code) {}
-    void handle() const;
+public:
+  Error(const std::string &message, const std::string &code) : message(message), code(code) {}
+  void handle() const;
 
-  private:
-    std::string message;
-    std::string code;
+private:
+  std::string message;
+  std::string code;
 };
 
 #endif

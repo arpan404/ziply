@@ -7,13 +7,13 @@ Ziply::Ziply(const std::string &fileName, const std::string &outputFileName, con
       frameHeight(frameHeight), bitPixelRatio(bitPixelRatio) {}
 
 void Ziply::convert() {
-    Generator generator(this->fileName, this->outputFileName, this->password, this->frameWidth, this->frameHeight,
-                        this->bitPixelRatio);
-    generator.generate();
+  Generator generator(this->fileName, this->outputFileName, this->password, this->frameWidth, this->frameHeight,
+                      this->bitPixelRatio);
+  generator.generate();
 }
 
 void Ziply::restore() {
-    Generator generator(this->fileName, this->outputFileName, this->password, this->frameWidth, this->frameHeight,
-                        this->bitPixelRatio);
-    generator.restore();
+  Generator generator(this->fileName, this->outputFileName, this->password, this->frameWidth, this->frameHeight,
+                      this->bitPixelRatio);
+  generator.restore();
 }

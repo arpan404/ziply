@@ -1,5 +1,7 @@
 BasedOnStyle: LLVM
-IndentWidth: 4
+IndentWidth: 2
 ColumnLimit: 120
 AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
