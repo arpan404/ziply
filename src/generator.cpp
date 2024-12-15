@@ -64,12 +64,18 @@ void Generator::generate() {
 
   fs::remove(outputFilePath);
 
-  const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " +
-                              (outputDir.string() / fs::path("frame_%d.png")).string() +
-                              " -c:v libx264 -r 60 -pix_fmt gray " + outputFilePath.replace_extension(".mp4").string();
+  const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " + outputDir.string() +
+                              "/frame_%d.png -c:v libx264 -r 60 -pix_fmt yuv420p " +
+                              outputFilePath.replace_extension(".mp4").string();
 
   std::cout << command << std::endl;
-  std::system(command.c_str());
+
+  int result = std::system(command.c_str());
+  if (result != 0) {
+    std::cerr << "Error occurred while generating the video." << std::endl;
+  }
+
+  fs::remove_all(outputDir);
 }
 
 std::future<void> Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
@@ -116,7 +122,7 @@ void Generator::restore() {
 
   // Ensure we have read permissions for input file
   if (!fs::is_regular_file(inputFilePath)) {
-    throw Error("Input file is not a regular file", "gen-fil  e-not-regular");
+    throw Error("Input file is not a regular file", "gen-file-not-regular");
   }
 
   if (inputFilePath.extension() != ".mp4") {
