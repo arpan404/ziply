@@ -64,9 +64,9 @@ void Generator::generate() {
 
   fs::remove(outputFilePath);
 
-  const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " + outputDir.string() +
-                              "/frame_%d.png -c:v libx264 -r 60 -pix_fmt yuv420p " +
-                              outputFilePath.replace_extension(".mp4").string();
+  const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " +
+                              (outputDir.string() / fs::path("frame_%d.png")).string() +
+                              " -c:v libx264 -r 60 -pix_fmt gray " + outputFilePath.replace_extension(".mp4").string();
 
   std::cout << command << std::endl;
   std::system(command.c_str());
@@ -101,36 +101,50 @@ std::future<void> Generator::convertToFrames(const std::vector<char> buffer, std
 
   std::future<void> future = std::async(std::launch::async, [frameName, img = std::move(image), this]() {
     stbi_write_png(frameName.c_str(), this->frameWidth, this->frameHeight, 3, img.get(), this->frameWidth * 3);
-    std::cout << "Frame written: " << frameName << std::endl;
   });
   return future;
 }
 
 void Generator::restore() {
-  std::vector<fs::path> filePaths = file::getConvertFilePath(this->inputFileName, this->outputFileName);
+  std::vector<fs::path> filePaths = file::getRestoreFilePath(this->inputFileName, this->outputFileName);
   fs::path inputFilePath = filePaths[0];
-  fs::path outputFilePath = filePaths[1].replace_extension(".png");
+  fs::path outputFilePath = filePaths[1].replace_extension(".ziply");
 
   if (!fs::exists(inputFilePath)) {
-    std::cerr << "Error: Input file '" << inputFilePath << "' does not exist." << std::endl;
-    throw std::runtime_error("Input file not found");
+    throw Error("Input file does not exist", "gen-file-not-exist");
   }
 
   // Ensure we have read permissions for input file
   if (!fs::is_regular_file(inputFilePath)) {
-    std::cerr << "Error: '" << inputFilePath << "' is not a regular file." << std::endl;
-    throw std::runtime_error("Invalid input file");
+    throw Error("Input file is not a regular file", "gen-fil  e-not-regular");
   }
 
-  std::cout << inputFilePath << std::endl;
-
-  try {
-    // Add debug output before decompression
-    std::cout << "Starting decompression and decryption..." << std::endl;
-    Ende::decompressAndDecrypt(inputFilePath, outputFilePath, this->password);
-    std::cout << "Decompression and decryption completed successfully" << std::endl;
-  } catch (const std::exception &e) {
-    std::cerr << "Detailed error during decompression: " << e.what() << std::endl;
-    throw;
+  if (inputFilePath.extension() != ".mp4") {
+    throw Error("Input file is not a video", "gen-file-not-video");
   }
+
+  fs::path outputDir =
+      outputFilePath.parent_path() / std::string(outputFilePath.stem().string() + "_frames" +
+                                                 std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                                                    std::chrono::system_clock::now().time_since_epoch())
+                                                                    .count()));
+
+  if (!fs::create_directories(outputDir)) {
+    throw Error("Could not create the output directory", "gen-dir-create");
+  }
+  std::string command = "ffmpeg -hwaccel auto -i " + inputFilePath.string() + " -vf fps=60 " +
+                        (outputDir / fs::path("frame_%d.png")).string();
+  std::system(command.c_str());
+
+  std::cout << "Decompression and decryption completed successfully" << std::endl;
+
+  // try {
+  //   // Add debug output before decompression
+  //   std::cout << "Starting decompression and decryption..." << std::endl;
+  //   Ende::decompressAndDecrypt(inputFilePath, outputFilePath, this->password);
+  //   std::cout << "Decompression and decryption completed successfully" << std::endl;
+  // } catch (const std::exception &e) {
+  //   std::cerr << "Detailed error during decompression: " << e.what() << std::endl;
+  //   throw;
+  // }
 }

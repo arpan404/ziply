@@ -9,6 +9,7 @@ bool pathExists(const std::string &path);
 fs::path getAbsolutePath(const std::string &path);
 
 std::vector<fs::path> getConvertFilePath(const std::string &inputFileName, const std::string &outputFileName);
+std::vector<fs::path> getRestoreFilePath(const std::string &inputFileName, const std::string &outputFileName);
 } // namespace file
 
 #endif
