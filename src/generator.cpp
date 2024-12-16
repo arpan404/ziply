@@ -4,6 +4,7 @@
 #include "file.hpp"
 #include "stb_image_write.h"
 #include "threadpool.hpp"
+#include <algorithm>
 #include <bitset>
 #include <chrono>
 #include <cstdlib>
@@ -78,7 +79,7 @@ void Generator::generate() {
     throw Error("Error occurred while generating the video", "gen-video-gen");
   }
 
-  // fs::remove_all(outputDir);
+  fs::remove_all(outputDir);
 }
 
 std::future<void> Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
@@ -123,7 +124,6 @@ void Generator::restore() {
     throw Error("Input file does not exist", "gen-file-not-exist");
   }
 
-  // Ensure we have read permissions for input file
   if (!fs::is_regular_file(inputFilePath)) {
     throw Error("Input file is not a regular file", "gen-file-not-regular");
   }
@@ -145,7 +145,22 @@ void Generator::restore() {
                         (outputDir / fs::path("frame_%d.png")).string();
   std::system(command.c_str());
 
-  std::cout << "Decompression and decryption completed successfully" << std::endl;
+  std::vector<fs::path> frames;
+
+  for (const auto &entry : fs::directory_iterator(outputDir)) { frames.push_back(entry); }
+
+  auto extensionFrame =
+      std::find_if(frames.begin(), frames.end(), [](const fs::path &frame) { return frame.stem() == "frame_1.png"; });
+
+  if (extensionFrame != frames.end()) {
+    throw Error("Could not find the frame containing file details.", "gen-frame-err");
+  }
+
+  std::sort(frames.begin(), frames.end(), [](const fs::path &a, const fs::path &b) {
+    int numA = std::stoi(a.stem().string().substr(6));
+    int numB = std::stoi(b.stem().string().substr(6));
+    return numA < numB;
+  });
 
   // try {
   //   // Add debug output before decompression
@@ -156,4 +171,10 @@ void Generator::restore() {
   //   std::cerr << "Detailed error during decompression: " << e.what() << std::endl;
   //   throw;
   // }
+}
+
+std::vector<char> Generator::restoreFrameData(const std::string frameName) {
+  size_t currentPixelIndex = 0;
+  
+
 }
