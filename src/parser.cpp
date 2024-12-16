@@ -32,12 +32,11 @@ void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileN
   }
 
   for (int i = 0; i < argc; i++) { this->params.push_back(std::string(argv[i])); }
-  this->validateArguments(isRestoring, fileName, outputFileName, password, frameHeight,
-                          frameWidth); // Removed bitPixelRatio
+  this->validateArguments(isRestoring, fileName, outputFileName, password, frameHeight, frameWidth);
 }
 
 void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName,
-                               std::string &password, int &frameHeight, int &frameWidth) { // Removed bitPixelRatio
+                               std::string &password, int &frameHeight, int &frameWidth) {
   if (params[1] != "create" && params[1] != "restore") {
     displayEnteredArguments(this);
     markErrorPart(1, this);
@@ -50,12 +49,12 @@ void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::st
     } else {
       isRestoring = true;
     }
-    prepareArguments(isRestoring, fileName, outputFileName, password, frameHeight, frameWidth); // Removed bitPixelRatio
+    prepareArguments(isRestoring, fileName, outputFileName, password, frameHeight, frameWidth);
   }
 }
 
 void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName,
-                              std::string &password, int &frameHeight, int &frameWidth) { // Removed bitPixelRatio
+                              std::string &password, int &frameHeight, int &frameWidth) {
   int argumentsListLength = params.size();
   bool isInputFileProvided = false;
   bool isResolutionProvided = false;
@@ -208,8 +207,13 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                           "'ziply --help'.",
                       "par-ez6");
         }
+      } else {
+        displayEnteredArguments(this);
+        markErrorPart(i, this);
+        throw Error("Invalid argument '" + params[i] +
+                        "' provided.\n\nFor detailed information on the available options, try running 'ziply --help'.",
+                    "par-ey5");
       }
-
       if (!isResolutionProvided) {
         frameHeight = 1080;
         frameWidth = 1920;

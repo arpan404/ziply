@@ -11,8 +11,8 @@
 #include <future>
 #include <iostream>
 #include <mutex>
-#include <vector>
 #include <opencv2/opencv.hpp>
+#include <vector>
 
 Generator::Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password,
                      const int frameWidth, const int frameHeight, const int bitPixelRatio) {
@@ -50,7 +50,6 @@ void Generator::generate() {
   std::string inputFileExtension = filePaths[0].extension().string();
   std::vector<char> byteVector(inputFileExtension.begin(), inputFileExtension.end());
 
-  for (char byte : byteVector) { std::cout << static_cast<int>(byte) << " "; }
   std::string frameName = outputDir / (std::string("frame_") + std::to_string(currentFrame++) + ".png");
   std::streamsize bytes_read = byteVector.size();
   pool.enqueue([this, buffer = std::vector<char>(byteVector), bytes_read, frameName]() {

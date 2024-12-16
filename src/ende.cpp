@@ -80,6 +80,7 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
   if (!inputFile)
     throw Error("Failed to open input file", "error-ende-input");
 
+  std::cout << "Compressing the file..." << std::endl;
   std::vector<uint8_t> inputData(static_cast<size_t>(inputFile.tellg()));
   inputFile.seekg(0);
   inputFile.read(reinterpret_cast<char *>(inputData.data()), inputData.size());
@@ -107,13 +108,16 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
   compressedData.resize(compressedData.size() - strm.avail_out);
   lzma_end(&strm);
 
+  std::cout << "Completed compressing the file ✅" << std::endl;
   std::array<uint8_t, SALT_SIZE> salt;
   if (!RAND_bytes(salt.data(), salt.size())) {
     throw Error("Failed to generate salt", "error-ende-salt");
   }
 
   Ende::EncryptionParams params = deriveKey(password, salt);
+  std::cout << "Encrypting the file..." << std::endl;
   std::vector<uint8_t> encryptedData = encrypt(compressedData, params);
+  std::cout << "Completed encrypting the file ✅" << std::endl;
 
   std::ofstream outputFile(outputFilePath, std::ios::binary);
   if (!outputFile)
@@ -133,6 +137,7 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
   if (!inputFile)
     throw Error("Failed to open input file", "error-ende-input");
 
+  std::cout << "Decrypting the file..." << std::endl;
   size_t fileSize = static_cast<size_t>(inputFile.tellg());
   inputFile.seekg(0);
 
@@ -149,7 +154,9 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
 
   Ende::EncryptionParams params = deriveKey(password, salt);
   std::vector<uint8_t> compressedData = decrypt(encryptedData, params);
+  std::cout << "Completed decrypting the file ✅" << std::endl;
 
+  std::cout << "Decompressing the file..." << std::endl;
   lzma_stream strm = LZMA_STREAM_INIT;
   lzma_ret ret = lzma_auto_decoder(&strm, UINT64_MAX, LZMA_CONCATENATED);
   if (ret != LZMA_OK)
@@ -181,6 +188,7 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
   }
 
   lzma_end(&strm);
+  std::cout << "Completed decompressing the file ✅" << std::endl;
   outputFile.close();
 
   return true;
