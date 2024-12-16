@@ -12,6 +12,9 @@ find_package(LibLZMA REQUIRED)
 # Find OpenSSL package
 find_package(OpenSSL REQUIRED)
 
+# Find OpenCV package
+find_package(OpenCV REQUIRED)
+
 # Add executable
 add_executable(ziply src/main.cpp src/parser.cpp src/ziply.cpp src/ende.cpp src/generator.cpp src/error.cpp src/file.cpp src/threadPool.cpp src/stb_image_write.cpp)
 
@@ -19,6 +22,7 @@ add_executable(ziply src/main.cpp src/parser.cpp src/ziply.cpp src/ende.cpp src/
 target_include_directories(ziply PRIVATE 
     include
     ${LIBLZMA_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 # Link against LZMA

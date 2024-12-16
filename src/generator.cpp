@@ -12,6 +12,7 @@
 #include <iostream>
 #include <mutex>
 #include <vector>
+#include <opencv2/opencv.hpp>
 
 Generator::Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password,
                      const int frameWidth, const int frameHeight, const int bitPixelRatio) {
@@ -46,6 +47,16 @@ void Generator::generate() {
     throw Error("Could not create the output directory", "gen-dir-create");
   }
 
+  std::string inputFileExtension = filePaths[0].extension().string();
+  std::vector<char> byteVector(inputFileExtension.begin(), inputFileExtension.end());
+
+  for (char byte : byteVector) { std::cout << static_cast<int>(byte) << " "; }
+  std::string frameName = outputDir / (std::string("frame_") + std::to_string(currentFrame++) + ".png");
+  std::streamsize bytes_read = byteVector.size();
+  pool.enqueue([this, buffer = std::vector<char>(byteVector), bytes_read, frameName]() {
+    return convertToFrames(buffer, bytes_read, frameName);
+  });
+
   while (file) {
     file.read(buffer.data(), buffer.size());
     std::streamsize bytes_read = file.gcount();
@@ -59,9 +70,8 @@ void Generator::generate() {
   pool.wait();
 
   fs::remove(outputFilePath);
-
   const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " + outputDir.string() +
-                              "/frame_%d.png -c:v libx264 -r 60 -pix_fmt yuv420p " +
+                              "/frame_%d.png -c:v h264 -pix_fmt yuv420p -r 60 " +
                               outputFilePath.replace_extension(".mp4").string();
 
   int result = std::system(command.c_str());
@@ -69,7 +79,7 @@ void Generator::generate() {
     throw Error("Error occurred while generating the video", "gen-video-gen");
   }
 
-  fs::remove_all(outputDir);
+  // fs::remove_all(outputDir);
 }
 
 std::future<void> Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
