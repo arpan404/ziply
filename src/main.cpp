@@ -1,4 +1,6 @@
+#include "ende.hpp"
 #include "error.hpp"
+#include "file.hpp"
 #include "parser.hpp"
 #include "ziply.hpp"
 #include <iostream>
@@ -20,5 +22,9 @@ int main(int argc, char *argv[]) {
       ziply.restore();
     else
       ziply.convert();
+    // std::cout<<(fs::current_path() / fileName).string()<<std::endl;
+    // std::cout<<(fs::current_path() / outputFileName).string()<<std::endl;
+    // Ende::decompressAndDecrypt((fs::current_path() / fileName).string(), (fs::current_path() /
+    // outputFileName).string(), password);
   } catch (const Error &e) { e.handle(); }
 }

@@ -202,6 +202,7 @@ void Generator::restore() {
   std::cout << "File Extension << " << fileExtension << " -  size :" << fileExtension.size() << std::endl;
 
   std::cout << "Restoring data from frames..." << std::endl;
+
   ThreadPool pool(std::thread::hardware_concurrency());
   fs::path fragDir =
       outputFilePath.parent_path() / std::string(outputFilePath.stem().string() + "_ziply_frags" +
@@ -245,6 +246,8 @@ void Generator::restore() {
   std::cout << "Completed generating ziply file ✅" << std::endl;
   fs::path finalFilePath = outputFilePath;
   finalFilePath.replace_extension(fileExtension);
+  outFile.close();
+  std::cout << "Password Used to Restore << " << this->password;
   Ende::decompressAndDecrypt(outputFilePath, finalFilePath, this->password);
 }
 
