@@ -1,6 +1,7 @@
 #ifndef GENERATOR_HPP
 #define GENERATOR_HPP
 
+#include "file.hpp"
 #include <future>
 #include <iostream>
 #include <string>
@@ -24,7 +25,7 @@ private:
                                     const std::string frameName);
   std::vector<char> restoreFrameData(const std::string framePath);
 
-  std::future<void> writeFramesToZiply(const std::vector<char> data, const std::string framePath);
+  std::future<void> writeFramesToZiplyFrag(const std::string framePath, const fs::path ziplyFragPath);
 };
 
 #endif

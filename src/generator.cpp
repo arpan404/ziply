@@ -73,6 +73,9 @@ void Generator::generate() {
 
   std::string frameName = outputDir / (std::string("frame_") + std::to_string(currentFrame++) + ".png");
   std::streamsize bytes_read = byteVector.size();
+
+  std::cout << "Generating frames..." << std::endl;
+
   pool.enqueue([this, buffer = std::vector<char>(byteVector), bytes_read, frameName]() {
     return convertToFrames(buffer, bytes_read, frameName);
   });
@@ -88,16 +91,19 @@ void Generator::generate() {
     }
   }
   pool.wait();
+  std::cout << "Completed generating the frames ✅" << std::endl;
 
   fs::remove(outputFilePath);
+  std::cout << "Generating the final video using ffmpeg..." << std::endl;
   const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " + outputDir.string() +
                               "/frame_%d.png -c:v libx264 -pix_fmt yuv420p -preset veryslow -qp 0 " +
                               outputFilePath.replace_extension(".mp4").string();
 
-  int result = std::system(command.c_str());
+  int result = std::system((command + " > /dev/null 2>&1").c_str());
   if (result != 0) {
     throw Error("Error occurred while generating the video", "gen-video-gen");
   }
+  std::cout << "Completed generating the video ✅" << std::endl;
 
   fs::remove_all(outputDir);
 }
@@ -194,15 +200,26 @@ void Generator::restore() {
   std::string fileExtension(extensionVector.begin(), extensionVector.end());
 
   std::cout << fileExtension;
-  // try {
-  //   // Add debug output before decompression
-  //   std::cout << "Starting decompression and decryption..." << std::endl;
-  //   Ende::decompressAndDecrypt(inputFilePath, outputFilePath, this->password);
-  //   std::cout << "Decompression and decryption completed successfully" << std::endl;
-  // } catch (const std::exception &e) {
-  //   std::cerr << "Detailed error during decompression: " << e.what() << std::endl;
-  //   throw;
-  // }
+
+  ThreadPool pool(std::thread::hardware_concurrency());
+  fs::path fragDir =
+      outputFilePath.parent_path() / std::string(outputFilePath.stem().string() + "_ziply_frags" +
+                                                 std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                                                    std::chrono::system_clock::now().time_since_epoch())
+                                                                    .count()));
+  if (!fs::create_directories(fragDir)) {
+    throw Error("Could not create directory to store fragment data.", "ziply-err-dir");
+  }
+  for (int i = 1; i < frames.size(); i++) {
+    std::string currentFramePath = frames[i];
+    fs::path currentZiplyPath = fragDir / std::string("ziply_frame_" + std::to_string(i) + ".zfrag");
+    pool.enqueue([this, framePath = currentFramePath, ziplyFragPath = currentZiplyPath]() {
+      return writeFramesToZiplyFrag(framePath, ziplyFragPath);
+    });
+  }
+
+  pool.wait();
+  fs::remove_all(outputDir);
 }
 
 std::vector<char> Generator::restoreFrameData(const std::string framePath) {
@@ -268,13 +285,17 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
 
   return frameCharVector;
 }
-std::future<void> writeFramesToZiply(const std::vector<char> data, const std::string framePath) {
-  return std::async(std::launch::async, [data, framePath]() {
-    std::ofstream outFile(framePath, std::ios::binary);
-    if (!outFile) {
-      throw Error("Could not open the output file for writing", "ziply-file-open");
-    }
-    outFile.write(data.data(), data.size());
-    outFile.close();
+std::future<void> Generator::writeFramesToZiplyFrag(const std::string framePath, const fs::path ziplyFragPath) {
+  std::vector<char> currentFrameData = restoreFrameData(framePath);
+  return std::async(std::launch::async, [currentFrameData, ziplyFragPath]() {
+    try {
+      std::ofstream outFile(ziplyFragPath, std::ios::binary);
+      if (!outFile) {
+        std::cout << "Could not create frag file" << ziplyFragPath;
+        throw Error("Could not open the output file for writing", "ziply-file-open");
+      }
+      outFile.write(currentFrameData.data(), currentFrameData.size());
+      outFile.close();
+    } catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
   });
 }
