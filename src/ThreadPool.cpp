@@ -1,24 +1,24 @@
 #include "threadpool.hpp"
 
 // Constructor for the ThreadPool class
-// Initializes a specified number of worker threads that will process tasks from the task queue.
+// Initializes a specified number of worker threads to process tasks from the queue.
 ThreadPool::ThreadPool(size_t threads) {
   // Create and launch worker threads
   for (size_t i = 0; i < threads; ++i) {
     workers.emplace_back([this]() {
-      // Infinite loop to keep the worker thread alive
+      // Infinite loop to keep the worker thread running
       while (true) {
-        std::function<std::future<void>()> task; // Variable to hold the task to be executed
+        std::function<std::future<void>()> task; // Variable to hold the task to execute
         {
           // Lock the mutex to safely access the task queue
           std::unique_lock<std::mutex> lock(queueMutex);
-          // Wait until there are tasks to process or the pool is stopping
+          // Wait for a task or a stop signal
           condition.wait(lock, [this] { return stop || !tasks.empty(); });
-          // If the pool is stopping and there are no tasks, exit the thread
+          // Exit thread if stopping and no tasks are left
           if (stop && tasks.empty()) {
             return;
           }
-          // Move the task from the queue to the local variable
+          // Get the task from the queue
           task = std::move(tasks.front());
           tasks.pop(); // Remove the task from the queue
         }
@@ -28,14 +28,14 @@ ThreadPool::ThreadPool(size_t threads) {
   }
 }
 
-// Waits for all tasks to complete and stops the thread pool
+// Waits for all tasks to complete and shuts down the thread pool
 void ThreadPool::wait() {
   {
-    // Lock the mutex to safely modify the stop flag
+    // Lock mutex to safely modify the stop flag
     std::unique_lock<std::mutex> lock(queueMutex);
-    stop = true; // Set the stop flag to true
+    stop = true; // Mark the pool as stopping
   }
-  condition.notify_all(); // Notify all worker threads to wake up
-  // Join all worker threads to ensure they finish execution
+  condition.notify_all(); // Wake up all worker threads
+  // Wait for all threads to finish execution
   for (std::thread &worker : workers) { worker.join(); }
 }
