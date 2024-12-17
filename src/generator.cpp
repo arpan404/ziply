@@ -202,7 +202,6 @@ void Generator::restore() {
   std::cout << "File Extension << " << fileExtension << " -  size :" << fileExtension.size() << std::endl;
 
   std::cout << "Restoring data from frames..." << std::endl;
-  return;
   ThreadPool pool(std::thread::hardware_concurrency());
   fs::path fragDir =
       outputFilePath.parent_path() / std::string(outputFilePath.stem().string() + "_ziply_frags" +
@@ -264,6 +263,7 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
     int currentBit = determineBit(currentPixel);
     if (currentBit == 2) {
       if (currentByte.size() != 8 && currentByte.size() != 0) {
+        std::cout << "Filling currentByte with additional bits..." << std::endl;
         for (int i = 0; i < (8 - currentByte.size()); i++) {
           cv::Vec3b pixel = image.at<cv::Vec3b>(currentY, currentX);
           int blue = static_cast<int>(pixel[0]);
@@ -271,8 +271,10 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
           int red = static_cast<int>(pixel[2]);
           if (blue <= 100) {
             currentByte.push_back(0);
+            std::cout << "Added 0 to currentByte from pixel at (" << currentX << ", " << currentY << ")" << std::endl;
           } else {
             currentByte.push_back(1);
+            std::cout << "Added 1 to currentByte from pixel at (" << currentX << ", " << currentY << ")" << std::endl;
           }
           currentX++;
           if (currentX >= this->frameWidth) {
@@ -284,8 +286,11 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
           }
         }
       }
-      currentFrameData.push_back(currentByte);
-      currentByte.clear();
+      if (currentByte.size() == 8) {
+        currentFrameData.push_back(currentByte);
+        currentByte.clear();
+      }
+
       break;
     } else {
       currentByte.push_back(currentBit);
@@ -309,8 +314,6 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
     char character = static_cast<unsigned char>(bits.to_ulong());
     frameCharVector.push_back(character);
   }
-  std::cout << "Frame Bytes: " << currentFrameData.size() << std::endl;
-  std::cout << "File Bytes: " << frameCharVector.size() << std::endl;
   return frameCharVector;
 }
 std::future<void> Generator::writeFramesToZiplyFrag(const std::string framePath, const fs::path ziplyFragPath) {
@@ -318,7 +321,6 @@ std::future<void> Generator::writeFramesToZiplyFrag(const std::string framePath,
   return std::async(std::launch::async, [currentFrameData, ziplyFragPath]() {
     std::ofstream outFile(ziplyFragPath, std::ios::binary);
     if (!outFile) {
-      std::cout << "Could not create frag file" << ziplyFragPath;
       throw Error("Could not open the output file for writing", "ziply-file-open");
     }
     outFile.write(currentFrameData.data(), currentFrameData.size());
