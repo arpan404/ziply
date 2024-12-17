@@ -93,7 +93,7 @@ void Generator::generate() {
   pool.wait();
   std::cout << "Completed generating the frames ✅" << std::endl;
 
-  fs::remove(outputFilePath);
+  // fs::remove(outputFilePath);
   std::cout << "Generating the final video using ffmpeg..." << std::endl;
   const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " + outputDir.string() +
                               "/frame_%d.png -c:v libx264 -pix_fmt yuv420p -preset veryslow -qp 0 " +
@@ -169,7 +169,8 @@ void Generator::restore() {
   }
   std::string command = "ffmpeg -hwaccel auto -i " + inputFilePath.string() + " -vf fps=60 " +
                         (outputDir / fs::path("frame_%d.png")).string();
-  std::system(command.c_str());
+
+  std::system((command + " > /dev/null 2>&1").c_str());
 
   std::vector<fs::path> frames;
 
@@ -199,7 +200,7 @@ void Generator::restore() {
 
   std::string fileExtension(extensionVector.begin(), extensionVector.end());
 
-  std::cout << fileExtension;
+  std::cout << "Restoring data from frames..." << std::endl;
 
   ThreadPool pool(std::thread::hardware_concurrency());
   fs::path fragDir =
@@ -220,6 +221,31 @@ void Generator::restore() {
 
   pool.wait();
   fs::remove_all(outputDir);
+  std::cout << "Completed restoring data from frames ✅" << std::endl;
+
+  std::cout << "Generating ziply file..." << std::endl;
+
+  std::ofstream outFile(outputFilePath, std::ios::binary);
+  if (!outFile) {
+    throw Error("Failed to open output file: " + outputFilePath.string(), "ziply-err-open-output");
+  }
+  for (int i = 1; i < frames.size(); i++) {
+    fs::path currentZiplyFragPath = fragDir / std::string("ziply_frame_" + std::to_string(i) + ".zfrag");
+    std::ifstream ziplyFragFile(currentZiplyFragPath, std::ios::binary);
+    if (!ziplyFragFile) {
+      throw Error("Failed to open ziply fragment file: " + currentZiplyFragPath.string(), "ziply-err-open");
+    }
+
+    outFile << ziplyFragFile.rdbuf();
+    if (ziplyFragFile.fail()) {
+      throw Error("Failed to read from ziply fragment file: " + currentZiplyFragPath.string(), "ziply-err-read");
+    }
+    ziplyFragFile.close();
+  }
+  std::cout << "Completed generating ziply file ✅" << std::endl;
+  fs::path finalFilePath = outputFilePath;
+  finalFilePath.replace_extension(fileExtension);
+  Ende::decompressAndDecrypt(outputFilePath, finalFilePath, this->password);
 }
 
 std::vector<char> Generator::restoreFrameData(const std::string framePath) {
@@ -279,7 +305,7 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
   std::vector<char> frameCharVector;
   for (const std::vector<int> &byteData : currentFrameData) {
     std::bitset<8> bits = vectorToBitset(byteData);
-    char character = static_cast<char>(bits.to_ulong());
+    char character = static_cast<unsigned char>(bits.to_ulong());
     frameCharVector.push_back(character);
   }
 
@@ -288,14 +314,12 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
 std::future<void> Generator::writeFramesToZiplyFrag(const std::string framePath, const fs::path ziplyFragPath) {
   std::vector<char> currentFrameData = restoreFrameData(framePath);
   return std::async(std::launch::async, [currentFrameData, ziplyFragPath]() {
-    try {
-      std::ofstream outFile(ziplyFragPath, std::ios::binary);
-      if (!outFile) {
-        std::cout << "Could not create frag file" << ziplyFragPath;
-        throw Error("Could not open the output file for writing", "ziply-file-open");
-      }
-      outFile.write(currentFrameData.data(), currentFrameData.size());
-      outFile.close();
-    } catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
+    std::ofstream outFile(ziplyFragPath, std::ios::binary);
+    if (!outFile) {
+      std::cout << "Could not create frag file" << ziplyFragPath;
+      throw Error("Could not open the output file for writing", "ziply-file-open");
+    }
+    outFile.write(currentFrameData.data(), currentFrameData.size());
+    outFile.close();
   });
 }
