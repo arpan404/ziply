@@ -111,17 +111,17 @@ To resolve such errors, refer to the help text using `ziply --help`.
 
 1. **Create a video with default resolution:**
 ```bash
-ziply create -f input.mp4
+ziply create -f input.ext
 ```
 
 2. **Create a video with 720p resolution and a password:**
 ```bash
-ziply create -f input.mp4 -o my_video -r 720p -p Secret123
+ziply create -f input.ext -o my_video -r 720p -p Secret123
 ```
 
 3. **Restore a file with a password:**
 ```bash
-ziply restore -f my_video.ziply -o restored_file -p Secret123
+ziply restore -f my_video.mp4 -o restored_file -p Secret123
 ```
 
 4. **View the help text:**
