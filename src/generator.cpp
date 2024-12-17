@@ -72,7 +72,7 @@ void Generator::generate() {
 
   fs::remove(outputFilePath);
   const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " + outputDir.string() +
-                              "/frame_%d.png -c:v h264 -pix_fmt yuv420p -r 60 " +
+                              "/frame_%d.png -c:v libx264 -pix_fmt yuv420p -preset veryslow -qp 0 " +
                               outputFilePath.replace_extension(".mp4").string();
 
   int result = std::system(command.c_str());
@@ -177,20 +177,25 @@ void Generator::restore() {
 }
 
 std::vector<char> Generator::restoreFrameData(const std::string framePath) {
+  std::cout << framePath;
   cv::Mat image = cv::imread(framePath);
 
   if (image.empty()) {
     throw Error("Could not open an image at: " + framePath, "gen-restore-empty-frame");
   }
-  int currentX = 0;
+  int currentX = 6;
   int currentY = 0;
-  cv::Vec3b pixel = image.at<cv::Vec3b>(currentY, currentY);
+  cv::Vec3b pixel = image.at<cv::Vec3b>(currentY, currentX);
   std::vector<char> data;
   data.push_back(static_cast<int>(pixel[0]));
   data.push_back(static_cast<int>(pixel[1]));
   data.push_back(static_cast<int>(pixel[2]));
-  std::cout << static_cast<int>(pixel[2]);
   for (auto i : data) { std::cout << i; }
+  for (int i = 0; i <= 35; i++) { std::cout << image.at<cv::Vec3b>(currentY, currentX++) << std::endl; }
+  currentY = 1;
+  currentX = 0;
+  std::cout << "Second" << std::endl;
+  for (int i = 0; i <= 35; i++) { std::cout << image.at<cv::Vec3b>(currentY, currentX++) << std::endl; }
 
   return data;
 }
