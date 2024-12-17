@@ -21,9 +21,9 @@ private:
   int bitPixelRatio;
   std::future<void> convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
                                     const std::string frameName);
-  std::vector<char> restoreFrameData(const std::string frameName);
+  std::vector<char> restoreFrameData(const std::string framePath);
 
-  std::future<void> writeFramesToZiply(const std::vector<char> data, const std::string frameName);
+  std::future<void> writeFramesToZiply(const std::vector<char> data, const std::string framePath);
 };
 
 #endif

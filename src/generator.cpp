@@ -12,6 +12,7 @@
 #include <future>
 #include <iostream>
 #include <mutex>
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
 #include <vector>
 
@@ -162,6 +163,8 @@ void Generator::restore() {
     return numA < numB;
   });
 
+  restoreFrameData(frames[0]);
+
   // try {
   //   // Add debug output before decompression
   //   std::cout << "Starting decompression and decryption..." << std::endl;
@@ -173,8 +176,31 @@ void Generator::restore() {
   // }
 }
 
-std::vector<char> Generator::restoreFrameData(const std::string frameName) {
-  size_t currentPixelIndex = 0;
-  
+std::vector<char> Generator::restoreFrameData(const std::string framePath) {
+  cv::Mat image = cv::imread(framePath);
 
+  if (image.empty()) {
+    throw Error("Could not open an image at: " + framePath, "gen-restore-empty-frame");
+  }
+  int currentX = 0;
+  int currentY = 0;
+  cv::Vec3b pixel = image.at<cv::Vec3b>(currentY, currentY);
+  std::vector<char> data;
+  data.push_back(static_cast<int>(pixel[0]));
+  data.push_back(static_cast<int>(pixel[1]));
+  data.push_back(static_cast<int>(pixel[2]));
+  std::cout << static_cast<int>(pixel[2]);
+  for (auto i : data) { std::cout << i; }
+
+  return data;
+}
+std::future<void> writeFramesToZiply(const std::vector<char> data, const std::string framePath) {
+  return std::async(std::launch::async, [data, framePath]() {
+    std::ofstream outFile(framePath, std::ios::binary);
+    if (!outFile) {
+      throw Error("Could not open the output file for writing", "ziply-file-open");
+    }
+    outFile.write(data.data(), data.size());
+    outFile.close();
+  });
 }
