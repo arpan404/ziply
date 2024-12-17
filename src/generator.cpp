@@ -199,7 +199,6 @@ void Generator::restore() {
   std::vector<char> extensionVector = restoreFrameData(frames[0]);
 
   std::string fileExtension(extensionVector.begin(), extensionVector.end());
-  std::cout << "File Extension << " << fileExtension << " -  size :" << fileExtension.size() << std::endl;
 
   std::cout << "Restoring data from frames..." << std::endl;
 
@@ -249,7 +248,10 @@ void Generator::restore() {
   finalFilePath.replace_extension(fileExtension);
   outFile.close();
   Ende::decompressAndDecrypt(outputFilePath, finalFilePath, this->password);
-  std::cout << "Completed restoring the original file ✅" << std::endl << "File saved at: " << finalFilePath;
+  fs::remove(outputFilePath);
+  fs::remove_all(fragDir);
+  std::cout << "Completed restoring the original file ✅" << std::endl
+            << "File saved at: " << finalFilePath << std::endl;
 }
 
 std::vector<char> Generator::restoreFrameData(const std::string framePath) {
