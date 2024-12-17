@@ -17,3 +17,5 @@ void Ziply::restore() {
                       this->bitPixelRatio);
   generator.restore();
 }
+
+

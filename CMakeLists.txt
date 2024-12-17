@@ -30,4 +30,3 @@ target_link_libraries(ziply PRIVATE ${LIBLZMA_LIBRARIES})
 
 # Link against OpenSSL
 target_link_libraries(ziply PRIVATE OpenSSL::Crypto ${OpenCV_LIBS})
-
