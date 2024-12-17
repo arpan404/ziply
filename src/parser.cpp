@@ -7,7 +7,7 @@ void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileN
   if (argc < 2) {
     throw Error("No arguments passed.\nIf you need help running ziply, run 'ziply --help'", "par-ex1");
   }
-  
+
   // If only the command is provided
   if (argc == 2) {
     std::string command = std::string(argv[1]);
@@ -37,7 +37,7 @@ void Parser::parse(int argc, char *argv[], bool &isRestoring, std::string &fileN
 
   // Store all command line arguments in the params vector
   for (int i = 0; i < argc; i++) { this->params.push_back(std::string(argv[i])); }
-  
+
   // Validate the parsed arguments
   this->validateArguments(isRestoring, fileName, outputFileName, password, frameHeight, frameWidth);
 }
@@ -61,15 +61,16 @@ void Parser::validateArguments(bool &isRestoring, std::string &fileName, std::st
     }
     // Prepare arguments based on the command
     prepareArguments(isRestoring, fileName, outputFileName, password, frameHeight, frameWidth);
+  }
 }
 
 // Method to prepare and validate the arguments based on the command
 void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::string &outputFileName,
                               std::string &password, int &frameHeight, int &frameWidth) {
   int argumentsListLength = params.size(); // Total number of arguments
-  bool isInputFileProvided = false; // Flag to check if input file is provided
-  bool isResolutionProvided = false; // Flag to check if resolution is provided
-  
+  bool isInputFileProvided = false;        // Flag to check if input file is provided
+  bool isResolutionProvided = false;       // Flag to check if resolution is provided
+
   // If restoring, only certain arguments are valid
   if (isRestoring) {
     std::unordered_set<std::string> availableArguments = {"-f", "-o", "-p"};
@@ -209,8 +210,8 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
                   frameHeight = 2160;
                   isResolutionProvided = true; // Mark resolution as provided
                 } else {
-                  frameWidth = 1920; // Default resolution
-                  frameHeight = 1080; // Default resolution
+                  frameWidth = 1920;           // Default resolution
+                  frameHeight = 1080;          // Default resolution
                   isResolutionProvided = true; // Mark resolution as provided
                 }
               }
@@ -243,7 +244,7 @@ void Parser::prepareArguments(bool &isRestoring, std::string &fileName, std::str
       // Set default resolution if not provided
       if (!isResolutionProvided) {
         frameHeight = 1080; // Default height
-        frameWidth = 1920; // Default width
+        frameWidth = 1920;  // Default width
       }
 
       // Check if an input file was provided

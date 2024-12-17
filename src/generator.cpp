@@ -92,6 +92,9 @@ void Generator::generate() {
 
   std::cout << "Generating frames..." << std::endl;
 
+  // Create a thread pool to handle the frame processing in parallel
+  ThreadPool pool(std::thread::hardware_concurrency());
+
   // Enqueue the frame generation task for the first frame
   pool.enqueue([this, buffer = std::vector<char>(byteVector), bytes_read, frameName]() {
     return convertToFrames(buffer, bytes_read, frameName);
