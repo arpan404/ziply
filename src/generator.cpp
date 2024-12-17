@@ -16,6 +16,25 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
+int determineBit(cv::Vec3b pixel) {
+  int blue = static_cast<int>(pixel[0]);
+  int green = static_cast<int>(pixel[1]);
+  int red = static_cast<int>(pixel[2]);
+  int average = (blue + green + red) / 3;
+  if (average >= 180) {
+    return 1;
+  } else if (average <= 50) {
+    return 0;
+  } else {
+    return 2;
+  }
+}
+std::bitset<8> vectorToBitset(const std::vector<int> &vec) {
+  std::bitset<8> bits;
+  for (size_t i = 0; i < vec.size() && i < bits.size(); ++i) { bits[i] = vec[i]; }
+  return bits;
+}
+
 Generator::Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password,
                      const int frameWidth, const int frameHeight, const int bitPixelRatio) {
   this->inputFileName = fileName;
@@ -163,8 +182,18 @@ void Generator::restore() {
     return numA < numB;
   });
 
-  restoreFrameData(frames[0]);
+  cv::Mat image = cv::imread(frames[0]);
 
+  if (image.empty()) {
+    throw Error("Could not open the image at: " + frames[0].string(), "gen-restore-empty-image");
+  }
+  this->frameHeight = image.rows;
+  this->frameWidth = image.cols;
+  std::vector<char> extensionVector = restoreFrameData(frames[0]);
+
+  std::string fileExtension(extensionVector.begin(), extensionVector.end());
+
+  std::cout << fileExtension;
   // try {
   //   // Add debug output before decompression
   //   std::cout << "Starting decompression and decryption..." << std::endl;
@@ -182,20 +211,62 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
   if (image.empty()) {
     throw Error("Could not open an image at: " + framePath, "gen-restore-empty-frame");
   }
-  int currentX = 6;
+  int currentX = 0;
   int currentY = 0;
-  cv::Vec3b pixel = image.at<cv::Vec3b>(currentY, currentX);
-  std::vector<char> data;
-  data.push_back(static_cast<int>(pixel[0]));
-  data.push_back(static_cast<int>(pixel[1]));
-  data.push_back(static_cast<int>(pixel[2]));
-  for (int i = 0; i <= 32; i++) { std::cout << i<<" "<<image.at<cv::Vec3b>(currentY, currentX++) << std::endl; }
-  currentY = 1;
-  currentX = 0;
-  std::cout << "Second" << std::endl;
-  for (int i = 0; i <= 35; i++) { std::cout << image.at<cv::Vec3b>(currentY, currentX++) << std::endl; }
+  std::vector<int> currentByte;
+  std::vector<std::vector<int>> currentFrameData;
+  while (true) {
+    cv::Vec3b currentPixel = image.at<cv::Vec3b>(currentY, currentX);
+    int currentBit = determineBit(currentPixel);
+    if (currentBit == 2) {
+      if (currentByte.size() != 8 && currentByte.size() != 0) {
+        for (int i = 0; i < (8 - currentByte.size()); i++) {
+          cv::Vec3b pixel = image.at<cv::Vec3b>(currentY, currentX);
+          int blue = static_cast<int>(pixel[0]);
+          int green = static_cast<int>(pixel[1]);
+          int red = static_cast<int>(pixel[2]);
+          if (blue <= 100) {
+            currentByte.push_back(0);
+          } else {
+            currentByte.push_back(1);
+          }
+          currentX++;
+          if (currentX >= this->frameWidth) {
+            currentX = 0;
+            currentY++;
+          }
+          if (currentY >= this->frameHeight) {
+            break;
+          }
+        }
+      }
+      currentFrameData.push_back(currentByte);
+      currentByte.clear();
+      break;
+    } else {
+      currentByte.push_back(currentBit);
+      if (currentByte.size() == 8) {
+        currentFrameData.push_back(currentByte);
+        currentByte.clear();
+      }
+    }
+    currentX++;
+    if (currentX >= this->frameWidth) {
+      currentX = 0;
+      currentY++;
+    }
+    if (currentY >= this->frameHeight) {
+      break;
+    }
+  }
+  std::vector<char> frameCharVector;
+  for (const std::vector<int> &byteData : currentFrameData) {
+    std::bitset<8> bits = vectorToBitset(byteData);
+    char character = static_cast<char>(bits.to_ulong());
+    frameCharVector.push_back(character);
+  }
 
-  return data;
+  return frameCharVector;
 }
 std::future<void> writeFramesToZiply(const std::vector<char> data, const std::string framePath) {
   return std::async(std::launch::async, [data, framePath]() {

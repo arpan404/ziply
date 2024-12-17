@@ -2,6 +2,7 @@
 #define GENERATOR_HPP
 
 #include <future>
+#include <iostream>
 #include <string>
 #include <vector>
 
