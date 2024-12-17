@@ -177,7 +177,6 @@ void Generator::restore() {
 }
 
 std::vector<char> Generator::restoreFrameData(const std::string framePath) {
-  std::cout << framePath;
   cv::Mat image = cv::imread(framePath);
 
   if (image.empty()) {
@@ -190,8 +189,7 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
   data.push_back(static_cast<int>(pixel[0]));
   data.push_back(static_cast<int>(pixel[1]));
   data.push_back(static_cast<int>(pixel[2]));
-  for (auto i : data) { std::cout << i; }
-  for (int i = 0; i <= 35; i++) { std::cout << image.at<cv::Vec3b>(currentY, currentX++) << std::endl; }
+  for (int i = 0; i <= 32; i++) { std::cout << i<<" "<<image.at<cv::Vec3b>(currentY, currentX++) << std::endl; }
   currentY = 1;
   currentX = 0;
   std::cout << "Second" << std::endl;
