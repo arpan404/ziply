@@ -93,7 +93,7 @@ void Generator::generate() {
   pool.wait();
   std::cout << "Completed generating the frames ✅" << std::endl;
 
-  // fs::remove(outputFilePath);
+  fs::remove(outputFilePath);
   std::cout << "Generating the final video using ffmpeg..." << std::endl;
   const std::string command = "ffmpeg -hwaccel auto -framerate 60 -i " + outputDir.string() +
                               "/frame_%d.png -c:v libx264 -pix_fmt yuv420p -preset veryslow -qp 0 " +
@@ -105,7 +105,7 @@ void Generator::generate() {
   }
   std::cout << "Completed generating the video ✅" << std::endl;
 
-  // fs::remove_all(outputDir);
+  fs::remove_all(outputDir);
 }
 
 std::future<void> Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
@@ -221,7 +221,7 @@ void Generator::restore() {
   }
 
   pool.wait();
-  // fs::remove_all(outputDir);
+  fs::remove_all(outputDir);
   std::cout << "Completed restoring data from frames ✅" << std::endl;
 
   std::cout << "Generating ziply file..." << std::endl;
@@ -244,11 +244,12 @@ void Generator::restore() {
     ziplyFragFile.close();
   }
   std::cout << "Completed generating ziply file ✅" << std::endl;
+  std::cout << "Converting ziply file to original file..." << std::endl;
   fs::path finalFilePath = outputFilePath;
   finalFilePath.replace_extension(fileExtension);
   outFile.close();
-  std::cout << "Password Used to Restore << " << this->password;
   Ende::decompressAndDecrypt(outputFilePath, finalFilePath, this->password);
+  std::cout << "Completed restoring the original file ✅" << std::endl << "File saved at: " << finalFilePath;
 }
 
 std::vector<char> Generator::restoreFrameData(const std::string framePath) {
@@ -266,7 +267,6 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
     int currentBit = determineBit(currentPixel);
     if (currentBit == 2) {
       if (currentByte.size() != 8 && currentByte.size() != 0) {
-        std::cout << "Filling currentByte with additional bits..." << std::endl;
         for (int i = 0; i < (8 - currentByte.size()); i++) {
           cv::Vec3b pixel = image.at<cv::Vec3b>(currentY, currentX);
           int blue = static_cast<int>(pixel[0]);
@@ -274,10 +274,8 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
           int red = static_cast<int>(pixel[2]);
           if (blue <= 100) {
             currentByte.push_back(0);
-            std::cout << "Added 0 to currentByte from pixel at (" << currentX << ", " << currentY << ")" << std::endl;
           } else {
             currentByte.push_back(1);
-            std::cout << "Added 1 to currentByte from pixel at (" << currentX << ", " << currentY << ")" << std::endl;
           }
           currentX++;
           if (currentX >= this->frameWidth) {
