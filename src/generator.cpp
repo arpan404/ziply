@@ -21,9 +21,9 @@ int determineBit(cv::Vec3b pixel) {
   int green = static_cast<int>(pixel[1]);
   int red = static_cast<int>(pixel[2]);
   int average = (blue + green + red) / 3;
-  if (average >= 180) {
+  if (average >= 200) {
     return 1;
-  } else if (average <= 50) {
+  } else if (average <= 40) {
     return 0;
   } else {
     return 2;
@@ -105,7 +105,7 @@ void Generator::generate() {
   }
   std::cout << "Completed generating the video ✅" << std::endl;
 
-  fs::remove_all(outputDir);
+  // fs::remove_all(outputDir);
 }
 
 std::future<void> Generator::convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
@@ -199,9 +199,10 @@ void Generator::restore() {
   std::vector<char> extensionVector = restoreFrameData(frames[0]);
 
   std::string fileExtension(extensionVector.begin(), extensionVector.end());
+  std::cout << "File Extension << " << fileExtension << " -  size :" << fileExtension.size() << std::endl;
 
   std::cout << "Restoring data from frames..." << std::endl;
-
+  return;
   ThreadPool pool(std::thread::hardware_concurrency());
   fs::path fragDir =
       outputFilePath.parent_path() / std::string(outputFilePath.stem().string() + "_ziply_frags" +
@@ -220,7 +221,7 @@ void Generator::restore() {
   }
 
   pool.wait();
-  fs::remove_all(outputDir);
+  // fs::remove_all(outputDir);
   std::cout << "Completed restoring data from frames ✅" << std::endl;
 
   std::cout << "Generating ziply file..." << std::endl;
@@ -308,7 +309,8 @@ std::vector<char> Generator::restoreFrameData(const std::string framePath) {
     char character = static_cast<unsigned char>(bits.to_ulong());
     frameCharVector.push_back(character);
   }
-
+  std::cout << "Frame Bytes: " << currentFrameData.size() << std::endl;
+  std::cout << "File Bytes: " << frameCharVector.size() << std::endl;
   return frameCharVector;
 }
 std::future<void> Generator::writeFramesToZiplyFrag(const std::string framePath, const fs::path ziplyFragPath) {
