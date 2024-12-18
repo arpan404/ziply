@@ -10,6 +10,7 @@ Ziply is a powerful tool designed to convert any file into a video format, allow
 
 - CMake
 - C++ Compiler (g++, Visual Studio, or MinGW)
+- ffmpeg
 - **Additional Libraries**:
   - OpenCV (4.5.0 or later)
   - OpenSSL (1.1.1 or later)
