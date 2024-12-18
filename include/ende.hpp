@@ -1,9 +1,9 @@
-#include "error.hpp" // Include custom error handling class
-#include <array>     // Include for using fixed-size arrays
-#include <fstream>   // Include for file input/output operations
-#include <lzma.h>    // Include for LZMA compression and decompression
-#include <openssl/aes.h> // Include for AES encryption
-#include <openssl/evp.h> // Include for high-level encryption and decryption functions
+#include "error.hpp"      // Include custom error handling class
+#include <array>          // Include for using fixed-size arrays
+#include <fstream>        // Include for file input/output operations
+#include <lzma.h>         // Include for LZMA compression and decompression
+#include <openssl/aes.h>  // Include for AES encryption
+#include <openssl/evp.h>  // Include for high-level encryption and decryption functions
 #include <openssl/rand.h> // Include for random number generation
 #include <openssl/sha.h>  // Include for SHA hashing functions
 #include <stdexcept>      // Include for standard exceptions
@@ -30,8 +30,8 @@ public:
 
   // Structure to hold encryption parameters including key, IV, and salt
   struct EncryptionParams {
-    std::array<uint8_t, KEY_SIZE> key; // Encryption key
-    std::array<uint8_t, IV_SIZE> iv;   // Initialization vector
+    std::array<uint8_t, KEY_SIZE> key;   // Encryption key
+    std::array<uint8_t, IV_SIZE> iv;     // Initialization vector
     std::array<uint8_t, SALT_SIZE> salt; // Salt for key derivation
   };
 
@@ -43,7 +43,7 @@ public:
   // - compressionLevel: Level of compression (default is 9)
   static bool compressAndEncrypt(const std::string &inputFilePath, const std::string &outputFilePath,
                                  const std::string &password, uint32_t compressionLevel = 9);
-  
+
   // Decompresses and decrypts the input file, saving to the output file
   // Parameters:
   // - inputFilePath: Path to the encrypted input file to be decrypted
@@ -58,13 +58,13 @@ private:
   // - password: The password used for key derivation
   // - salt: The salt used in the key derivation process
   static EncryptionParams deriveKey(const std::string &password, const std::array<uint8_t, SALT_SIZE> &salt);
-  
+
   // Encrypts the given data using the specified encryption parameters
   // Parameters:
   // - data: The data to be encrypted
   // - params: The encryption parameters including key and IV
   static std::vector<uint8_t> encrypt(const std::vector<uint8_t> &data, const EncryptionParams &params);
-  
+
   // Decrypts the given data using the specified encryption parameters
   // Parameters:
   // - data: The data to be decrypted

@@ -7,12 +7,12 @@
 // It manages file input/output, resolution settings, and password protection.
 class Ziply {
 private:
-  std::string fileName;        // The name of the input file to be processed
-  std::string outputFileName;  // The name of the output file after processing
-  int frameHeight;             // The height of the video frames
-  int frameWidth;              // The width of the video frames
-  float bitPixelRatio;         // The ratio of bits per pixel for encoding
-  std::string password;        // The password for encrypting/decrypting the video file
+  std::string fileName;       // The name of the input file to be processed
+  std::string outputFileName; // The name of the output file after processing
+  int frameHeight;            // The height of the video frames
+  int frameWidth;             // The width of the video frames
+  float bitPixelRatio;        // The ratio of bits per pixel for encoding
+  std::string password;       // The password for encrypting/decrypting the video file
 
 public:
   // Constructor to initialize the Ziply object with necessary parameters.

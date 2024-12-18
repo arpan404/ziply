@@ -1,9 +1,9 @@
 #ifndef ERROR_HPP // Include guard to prevent multiple inclusions of this header file
 #define ERROR_HPP
 
-#include <cstdlib> // Standard library for general utilities, including memory allocation
+#include <cstdlib>  // Standard library for general utilities, including memory allocation
 #include <iostream> // Standard library for input and output stream operations
-#include <string> // Standard library for using the string data type
+#include <string>   // Standard library for using the string data type
 
 // The Error class is responsible for handling error messages and codes.
 // It encapsulates the error message and its associated code, providing a method to handle the error.
@@ -20,7 +20,7 @@ public:
 
 private:
   std::string message; // The error message to be displayed or logged
-  std::string code; // The error code associated with the error
+  std::string code;    // The error code associated with the error
 };
 
 #endif // End of include guard

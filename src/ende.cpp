@@ -6,7 +6,7 @@
 // - salt: The salt used in the key derivation process.
 // Returns: An EncryptionParams object containing the derived key and IV.
 Ende::EncryptionParams Ende::deriveKey(const std::string &password, const std::array<uint8_t, SALT_SIZE> &salt) {
-  Ende::EncryptionParams params; // Structure to hold the derived key and IV.
+  Ende::EncryptionParams params;    // Structure to hold the derived key and IV.
   std::array<uint8_t, 32> keyAndIv; // Buffer to hold the key and IV.
 
   // Derive the key and IV using PBKDF2 with HMAC-SHA256.
@@ -27,7 +27,7 @@ Ende::EncryptionParams Ende::deriveKey(const std::string &password, const std::a
 // - params: The encryption parameters containing the key and IV.
 // Returns: A vector containing the encrypted data.
 std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const EncryptionParams &params) {
-  std::vector<uint8_t> encryptedData; // Vector to hold the encrypted data.
+  std::vector<uint8_t> encryptedData;                       // Vector to hold the encrypted data.
   encryptedData.resize(data.size() + EVP_MAX_BLOCK_LENGTH); // Resize to accommodate potential padding.
 
   EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new(); // Create a new encryption context.
@@ -55,8 +55,8 @@ std::vector<uint8_t> Ende::encrypt(const std::vector<uint8_t> &data, const Encry
   }
 
   encryptedData.resize(len + finalLen); // Resize to the actual size of the encrypted data.
-  EVP_CIPHER_CTX_free(ctx); // Free the encryption context.
-  return encryptedData; // Return the encrypted data.
+  EVP_CIPHER_CTX_free(ctx);             // Free the encryption context.
+  return encryptedData;                 // Return the encrypted data.
 }
 
 // Decrypts the provided data using the specified decryption parameters.
@@ -92,8 +92,8 @@ std::vector<uint8_t> Ende::decrypt(const std::vector<uint8_t> &data, const Encry
   }
 
   decryptedData.resize(len + finalLen); // Resize to the actual size of the decrypted data.
-  EVP_CIPHER_CTX_free(ctx); // Free the decryption context.
-  return decryptedData; // Return the decrypted data.
+  EVP_CIPHER_CTX_free(ctx);             // Free the decryption context.
+  return decryptedData;                 // Return the decrypted data.
 }
 
 // Compresses and encrypts the input file, saving the result to the output file.
@@ -121,7 +121,7 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
   if (ret != LZMA_OK)
     throw Error("Failed to initialize LZMA encoder", "error-ende-compress");
 
-  std::vector<uint8_t> compressedData; // Vector to hold the compressed data.
+  std::vector<uint8_t> compressedData;                   // Vector to hold the compressed data.
   compressedData.resize(inputData.size() + BUFFER_SIZE); // Resize to accommodate the compressed data.
 
   // Set up the input and output buffers for the LZMA encoder.
@@ -138,10 +138,10 @@ bool Ende::compressAndEncrypt(const std::string &inputFilePath, const std::strin
   }
 
   compressedData.resize(compressedData.size() - strm.avail_out); // Resize to the actual size of the compressed data.
-  lzma_end(&strm); // Clean up the LZMA stream.
+  lzma_end(&strm);                                               // Clean up the LZMA stream.
 
   std::cout << "Completed compressing the file ✅" << std::endl;
-  std::array<uint8_t, SALT_SIZE> salt; // Buffer to hold the salt for encryption.
+  std::array<uint8_t, SALT_SIZE> salt;         // Buffer to hold the salt for encryption.
   if (!RAND_bytes(salt.data(), salt.size())) { // Generate a random salt.
     throw Error("Failed to generate salt", "error-ende-salt");
   }
@@ -185,12 +185,12 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
     throw Error("Invalid file format", "error-ende-file-size");
   }
 
-  std::array<uint8_t, SALT_SIZE> salt; // Buffer to hold the salt.
+  std::array<uint8_t, SALT_SIZE> salt;                              // Buffer to hold the salt.
   inputFile.read(reinterpret_cast<char *>(salt.data()), SALT_SIZE); // Read the salt from the input file.
 
   std::vector<uint8_t> encryptedData(fileSize - SALT_SIZE); // Vector to hold the encrypted data.
   inputFile.read(reinterpret_cast<char *>(encryptedData.data()), encryptedData.size()); // Read the encrypted data.
-  inputFile.close(); // Close the input file.
+  inputFile.close();                                                                    // Close the input file.
 
   // Derive the decryption parameters using the password and the read salt.
   Ende::EncryptionParams params = deriveKey(password, salt);
@@ -218,7 +218,8 @@ bool Ende::decompressAndDecrypt(const std::string &inputFilePath, const std::str
     ret = lzma_code(&strm, LZMA_FINISH);
     if (strm.avail_out == 0 || ret == LZMA_STREAM_END) {
       size_t written = outputData.size() - strm.avail_out; // Calculate the amount of data written.
-      outputFile.write(reinterpret_cast<char *>(outputData.data()), written); // Write the decompressed data to the output file.
+      outputFile.write(reinterpret_cast<char *>(outputData.data()),
+                       written);         // Write the decompressed data to the output file.
       strm.next_out = outputData.data(); // Reset the output buffer.
       strm.avail_out = outputData.size();
     }

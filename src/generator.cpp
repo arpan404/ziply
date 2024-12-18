@@ -446,4 +446,3 @@ std::future<void> Generator::writeFramesToZiplyFrag(const std::string framePath,
     outFile.close();
   });
 }
-

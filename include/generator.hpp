@@ -22,20 +22,20 @@ public:
   // - bitPixelRatio: The ratio of bits per pixel for encoding.
   Generator(const std::string &fileName, const std::string &outputFileName, const std::string &password,
             const int frameWidth, const int frameHeight, const int bitPixelRatio);
-  
+
   // Method to generate video frames from the input file.
   void generate();
-  
+
   // Method to restore video frames from Ziply fragments.
   void restore();
 
 private:
-  std::string inputFileName; // The name of the input file
+  std::string inputFileName;  // The name of the input file
   std::string outputFileName; // The name of the output file
-  std::string password; // The password for encryption/decryption
-  int frameWidth; // The width of the video frames
-  int frameHeight; // The height of the video frames
-  int bitPixelRatio; // The ratio of bits per pixel for encoding
+  std::string password;       // The password for encryption/decryption
+  int frameWidth;             // The width of the video frames
+  int frameHeight;            // The height of the video frames
+  int bitPixelRatio;          // The ratio of bits per pixel for encoding
 
   // Asynchronously converts the input buffer into video frames.
   // Parameters:
@@ -44,7 +44,7 @@ private:
   // - frameName: The name of the frame to be created.
   std::future<void> convertToFrames(const std::vector<char> buffer, std::streamsize bytes_read,
                                     const std::string frameName);
-  
+
   // Restores frame data from a given frame path.
   // Parameters:
   // - framePath: The path to the frame file to be restored.
