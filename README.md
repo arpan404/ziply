@@ -342,18 +342,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Ziply
-
-Ziply is a powerful tool designed to convert any file into a video format, allowing for easy restoration later. It supports various resolutions, ensuring that your output meets your desired quality. Additionally, Ziply offers encryption options to secure your files during the conversion process, providing peace of mind for sensitive data.
-
----
-
-## ⚙️ Installation and Compilation
-
-[Previous Installation and Compilation section remains unchanged]
-
----
-
 ## 🤝 Contributing to Ziply
 
 We welcome contributions from the community! Here's how you can help:
