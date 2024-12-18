@@ -221,8 +221,6 @@ void Generator::restore() {
   auto extensionFrame = std::find_if(frames.begin(), frames.end(),
                                      [](const fs::path &frame) { return frame.stem().string() == "frame_1"; });
 
-  for (auto i : frames) { std::cout << i << std::endl; }
-
   if (extensionFrame == frames.end()) {
     throw Error("Could not find the frame containing file details.", "gen-frame-err");
   }
