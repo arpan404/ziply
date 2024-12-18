@@ -231,7 +231,6 @@ void Generator::restore() {
     int numB = std::stoi(b.stem().string().substr(6));
     return numA < numB;
   });
-
   // Read the first frame to extract image metadata
   cv::Mat image = cv::imread(frames[0]);
 
