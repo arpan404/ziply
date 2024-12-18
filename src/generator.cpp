@@ -218,8 +218,10 @@ void Generator::restore() {
   for (const auto &entry : fs::directory_iterator(outputDir)) { frames.push_back(entry); }
 
   // Ensure that the first frame exists and contains the required metadata
-  auto extensionFrame =
-      std::find_if(frames.begin(), frames.end(), [](const fs::path &frame) { return frame.stem() == "frame_1.png"; });
+  auto extensionFrame = std::find_if(frames.begin(), frames.end(),
+                                     [](const fs::path &frame) { return frame.stem().string() == "frame_1"; });
+
+  for (auto i : frames) { std::cout << i << std::endl; }
 
   if (extensionFrame == frames.end()) {
     throw Error("Could not find the frame containing file details.", "gen-frame-err");
@@ -447,3 +449,4 @@ std::future<void> Generator::writeFramesToZiplyFrag(const std::string framePath,
     outFile.close();
   });
 }
+
