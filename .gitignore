@@ -1,10 +1,93 @@
-CMakeFiles/
-cmake_install.cmake
-CMakeCache.txt
-Makefile
-ziply
-.vscode/
-.DS_Store
-test.png
+# Build directories
 build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+out/
+cmake-build-*/
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+ziply
+
+# Specific project executable
 *.ziply
+
+# IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Mac system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Debugging and profiling files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Dependency directories
+vendor/
+third_party/
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlite3
+
+# Environment and configuration
+.env
+.venv
+venv/
+ENV/
+
+# Temporary files
+*.bak
+*.tmp
+*.temp
+
+# Backup files
+*.backup
+*.swp
+*.swo
+
+# Misc
+.DS_Store
+.AppleDouble
+.LSOverride
