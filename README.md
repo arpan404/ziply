@@ -393,6 +393,6 @@ cmake . && make
 
 ### Reporting Security Issues
 
-For security vulnerabilities, please contact @arpan404 instead of creating a public issue.
+For security vulnerabilities, please contact [@arpan404](https://github.com/arpan404) instead of creating a public issue.
 
 ---
